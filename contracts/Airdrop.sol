@@ -11,6 +11,7 @@ contract AirDrop is Ownable {
     * @dev The AirdropCampaign struct used for airdrops
     */
     struct AirDropCampaign {
+        bool created;
         address tokenHolder;
         uint participantCount;
         uint256 maxParticipants;
@@ -20,12 +21,14 @@ contract AirDrop is Ownable {
 
     event TokenDrop(address receiver, uint256 amount);
 
-    uint private airDropCounter = 0;
+    uint public airDropCounter = 0;
     GameToken private token;
     mapping(uint256 => AirDropCampaign) airDrops;
 
     /**
     * @dev Airdrop Constructor
+    *
+    * @param _token The Custom token address
     */
     function AirDrop(
         GameToken _token
@@ -42,9 +45,9 @@ contract AirDrop is Ownable {
     * @param _amount The amount to distribute
     */
     function createAirDrop(
-    address _tokenHolder,
-    uint256 _maxParticipants,
-    uint256 _amount
+        address _tokenHolder,
+        uint256 _maxParticipants,
+        uint256 _amount
     ) public onlyOwner returns (uint airDropID)
     {
         airDropCounter++;
@@ -54,7 +57,8 @@ contract AirDrop is Ownable {
             tokenHolder: _tokenHolder,
             maxParticipants: _maxParticipants,
             amount: _amount,
-            participantCount: 0
+            participantCount: 0,
+            created: true
         });
     }
 
@@ -64,12 +68,16 @@ contract AirDrop is Ownable {
     * @param _airDropID The airDrop
     * @param _participant The participants address to add.
     */
-    function addParticipantToAirdrop(
+    function addParticipantToAirDrop(
         uint _airDropID,
         address _participant
     ) public onlyOwner returns (uint participantID)
     {
-        participantID = airDrops[_airDropID].participantCount++;
+        require(airDrops[_airDropID].created);
+
+        airDrops[_airDropID].participantCount++;
+
+        participantID = airDrops[_airDropID].participantCount;
 
         airDrops[_airDropID].participants[participantID] = _participant;
     }

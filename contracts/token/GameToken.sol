@@ -13,7 +13,7 @@ contract GameToken is MintableToken {
     uint256 public coinPrice;
     bool public capLocked = false;
 
-    bool private transfersAllowed = false;
+    bool private transfersAllowed = true;
 
     /**
      * @dev Burning event.
@@ -32,7 +32,7 @@ contract GameToken is MintableToken {
         uint256 _value
     ) 
     {
-        require(transfersAllowed || _sender == owner);
+        require(transfersAllowed);
         _;
     }
 
@@ -124,7 +124,7 @@ contract GameToken is MintableToken {
         address _from,
         address _to,
         uint256 _value
-    ) public canTransfer(_from, _value) returns (bool)
+    ) public canTransfer(_from, _value) returns (bool) 
     {
         return super.transferFrom(_from, _to, _value);
     }

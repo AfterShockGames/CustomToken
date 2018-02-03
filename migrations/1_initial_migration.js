@@ -2,9 +2,11 @@ var Migrations = artifacts.require("./Migrations.sol");
 var GameToken = artifacts.require("./token/GameToken.sol");
 var AirDrop = artifacts.require("./AirDrop.sol");
 
+var dropper = "0xcBAC9e86E0B7160F1a8E4835ad01Dd51c514afce";
+
 module.exports = function(deployer) {
     deployer.deploy(Migrations);
-
-    //deployer.deploy(Airdrop, dropper);
-    //deployer.deploy(Gametoken, 1000000);
+    deployer.deploy(GameToken, 1*1000*1000*1000).then(() => {
+        return deployer.deploy(AirDrop, GameToken.address);    
+    });
 };
