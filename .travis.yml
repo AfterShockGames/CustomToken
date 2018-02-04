@@ -12,7 +12,7 @@ before_script:
   - npm i -g truffle
   - npm i -g ethereumjs-testrpc
 script:
-  - testrpc &> /dev/null &
+  - truffle develop --log &> /dev/null
   - truffle compile
   - truffle migrate --reset
   - truffle test
