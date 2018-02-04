@@ -7,12 +7,14 @@
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "truffle test",
+    "coverage": "./node_modules/.bin/solidity-coverage"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "coveralls": "^3.0.0",
     "zeppelin-solidity": "1.6.0"
   }
 }
