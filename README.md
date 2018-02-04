@@ -1,5 +1,6 @@
 # GameToken WIP
 [![Build Status](https://travis-ci.org/AfterShockGames/CustomToken.svg?branch=master)](https://travis-ci.org/AfterShockGames/CustomToken)
+[![Coverage Status](https://coveralls.io/repos/github/AfterShockGames/CustomToken/badge.svg?branch=master)](https://coveralls.io/github/AfterShockGames/CustomToken?branch=master)
 
 This repository includes:
 
