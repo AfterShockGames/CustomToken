@@ -1,6 +1,6 @@
 # GameToken WIP
 [![Build Status](https://img.shields.io/travis/AfterShockGames/CustomToken.svg?branch=master&style=flat-square)](https://travis-ci.org/AfterShockGames/CustomToken)
-[![Coverage Status](https://img.shields.io/coveralls/github/AfterShockGames/CustomToken/badge.svg?branch=master&style=flat-square)](https://coveralls.io/github/AfterShockGames/CustomToken?branch=master)
+[![Coverage Status](https://img.shields.io/coveralls/github/AfterShockGames/CustomToken/master.svg?style=flat-square)](https://coveralls.io/github/AfterShockGames/CustomToken?branch=master)
 
 This repository includes:
 

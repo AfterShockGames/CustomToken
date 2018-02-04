@@ -25,7 +25,7 @@ contract('GameToken', (accounts) => {
 
     describe('Transfers and token locking', () => {
 
-        //Start testing locked tokens
+        //Test locked transfer
         it('Should not allow the token to be transferred during lock state', async () => {
             try {
                 await tokenContract.transfer.call(owner, 1000, {from: receiver});
@@ -36,6 +36,7 @@ contract('GameToken', (accounts) => {
             }
         });
 
+        //Test locked transfer by owner
         it('Should allow the token to be transferred by the owner during lock state', async () => {
             return tokenContract.transfer.call(receiver, 1000).then((result) => {
                 assert.isOk(result, "The owner should be able to transfer the token!");
