@@ -1,92 +1,46 @@
-let AirDrop = artifacts.require("./AirDrop.sol");
 let GameToken = artifacts.require("./GameToken.sol");
 
-//TestData
 let gameTokenMarketCap = 1*1000*1000*1000;
 let amountToMint = 1*1000*1000;
-let amountToApprove = 1*1000*1000*1000*1000;
-let amountToDrop = 1000;
-let airDropParticipants = 2;
+let smallAmountToMint = 1000;
 
-//Expected Test Results
-let expectedAirDropID = 0;
-
-contract('Airdrop', (accounts) => {
+contract('GameToken', (accounts) => {
     let tokenContract;
-    let airDropContract;
-    let participantID;
-    let dropper = accounts[0];
-    let receiver = accounts[1];
-    let receiver2 = accounts[2];
+    let owner = accounts[0];
+    let receiver = accounts[1]
 
     /**
      * Initial setup. 
-     * Mint tokens to dropper address and check it.
+     * Mint tokens to start address
      */
     before(() => {
         return GameToken.new(gameTokenMarketCap).then((instance) => {
             tokenContract = instance;
 
-            return AirDrop.new(tokenContract.address);
-        }).then((instance) => {
-            airDropContract = instance;
-
-            return tokenContract.mint(dropper, amountToMint).then(() => {
-                return tokenContract.balanceOf.call(dropper);
-            }).then((balance) => {
-                console.log(balance.valueOf());
-                assert.equal(balance.valueOf(), amountToMint, "Token dropper balance should equal minted balance!");
-            });
+            return tokenContract.mint(owner, amountToMint);
         }).then(() => {
-            tokenContract.approve(airDropContract.address, amountToApprove);
+            return tokenContract.mint(receiver, smallAmountToMint);
         });
     });
 
-    describe('Creation and Execution', () => {
-        let airDropID;
+    describe('Transfers and token locking', () => {
 
-        it('Allows creating an airDrop and increments the ID', async () => {
-            //Firstly test with .call
-            airDropContract.createAirDrop.call(dropper, airDropParticipants, amountToDrop).then((airDrop) => {
-                airDropID = airDrop;
-                
-                assert.equal(airDropID.valueOf(), expectedAirDropID, "AirDrop ID not correctly created!");
-            });
+        //Start testing locked tokens
+        it('Should not allow the token to be transferred during lock state', async () => {
+            try {
+                await tokenContract.transfer.call(owner, 1000, {from: receiver});
+            } catch (error) {
+                assert.notEqual(error, true, "The sender should not be able to transfer the tokens!");
 
-            //Execute on blockchain
-            await airDropContract.createAirDrop(dropper, airDropParticipants, amountToDrop);
-
-            return true;
+                return error;
+            }
         });
 
-        //Add an participant to the created airDrop
-        it('Allows adding a participant to the AirDrop', () => {
-            airDropContract.addParticipantToAirDrop.call(airDropID, receiver).then(participantID => {
-                assert.equal(participantID.valueOf(), expectedAirDropID, "Participant ID not correctly created!");
-            });
+        it('Should allow the token to be transferred by the owner during lock state', async () => {
+            return tokenContract.transfer.call(receiver, 1000).then((result) => {
+                assert.isOk(result, "The owner should be able to transfer the token!");
 
-            airDropContract.addParticipantToAirDrop(airDropID, receiver);
-            airDropContract.addParticipantToAirDrop(airDropID, receiver2);
-
-            return true;
-        });
-
-        it('Allows distributing an airDrop and sends the right amount of credits to both participants', async () => {
-            //Distribute and check the airDrop
-            return airDropContract.distribute(airDropID).then(success => {
-                return tokenContract.balanceOf.call(receiver);
-            }).then(balance => {
-                assert.equal(balance.valueOf(), amountToDrop, "AirDrop was not executed correctly.");
-
-                return tokenContract.balanceOf.call(receiver2);
-            }).then((balance) => {
-                assert.equal(balance.valueOf(), amountToDrop, "AirDrop was not executed correctly.");
-
-                return tokenContract.balanceOf.call(dropper);
-            }).then((balance) => {
-                assert.equal(balance.valueOf(), amountToMint - amountToDrop * 2, "Token Dropper should've lost the dropped coins!");
-
-                return true;
+                return result;
             });
         });
     });
