@@ -1,17 +1,25 @@
-dist: trusty
 sudo: required
-group: beta
-language: node_js
-node_js:
-  - "8"
-cache:
-  directories:
-    - node_modules
-before_script:
-  - npm i -g solc
-  - npm i -g truffle
-  - npm i -g ethereumjs-testrpc
+
+language: generic
+
+services:
+  - docker
+
+before_install:
+  - docker pull truffle/ci
+
+env:
+  - TEST=repo
+  - TEST=upstream
+  - TEST=scenario
+
 script:
-  - truffle compile
-  - truffle migrate --reset
-  - truffle test
+  - >
+    docker run -it --rm --name ${TEST} \
+        -e TRAVIS_REPO_SLUG \
+        -e TRAVIS_PULL_REQUEST \
+        -e TRAVIS_PULL_REQUEST_SLUG \
+        -e TRAVIS_PULL_REQUEST_BRANCH \
+        -e TRAVIS_BRANCH \
+        -e TEST \
+      truffle/ci:latest run_tests
