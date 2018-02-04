@@ -13,7 +13,7 @@ cache:
 before_script:
   - npm i -g solc
   - npm i -g truffle
-  - npm i -g ethereumjs-testrpc
+  - npm i -g ganache-cli
   - nohup truffle develop --log &> /dev/null &
 
 script:

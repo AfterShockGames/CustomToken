@@ -1,4 +1,5 @@
 # GameToken WIP
+[![Build Status](https://travis-ci.org/AfterShockGames/CustomToken.svg?branch=master)](https://travis-ci.org/AfterShockGames/CustomToken)
 
 This repository includes:
 
@@ -11,7 +12,7 @@ This project requires Solidity ^0.4.4.
 Install dependencies:
     ``npm i -g solc``
     ``npm i -g truffle``
-    ``npm i -g ethereumjs-testrpc``
+    ``npm i -g ganache-cli``
     ``npm install``
 
 Run tests:
