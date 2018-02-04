@@ -12,11 +12,11 @@ This project requires Solidity ^0.4.4.
 
 Install dependencies:
 
-    ``npm i -g solc``
-    ``npm i -g truffle``
-    ``npm i -g ganache-cli``
-    ``npm install``
+    npm i -g solc
+    npm i -g truffle
+    npm i -g ganache-cli
+    npm install
 
 Run tests:
 
-    ``truffle test``
+    truffle test
