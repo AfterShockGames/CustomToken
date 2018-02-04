@@ -19,7 +19,7 @@ contract AirDrop is Ownable {
         mapping(uint => address) participants;
     }
 
-    event TokenDrop(address receiver, uint256 amount);
+    event TokenDrop(address sender, address receiver, uint256 amount);
 
     uint public airDropCounter = 0;
     GameToken private token;
@@ -50,7 +50,6 @@ contract AirDrop is Ownable {
         uint256 _amount
     ) public onlyOwner returns (uint airDropID)
     {
-        airDropCounter++;
         airDropID = airDropCounter;
 
         airDrops[airDropID] = AirDropCampaign({
@@ -60,6 +59,8 @@ contract AirDrop is Ownable {
             participantCount: 0,
             created: true
         });
+
+        airDropCounter++;
     }
 
     /**
@@ -75,11 +76,11 @@ contract AirDrop is Ownable {
     {
         require(airDrops[_airDropID].created);
 
-        airDrops[_airDropID].participantCount++;
-
         participantID = airDrops[_airDropID].participantCount;
 
         airDrops[_airDropID].participants[participantID] = _participant;
+
+        airDrops[_airDropID].participantCount++;
     }
 
     /**
@@ -92,9 +93,9 @@ contract AirDrop is Ownable {
     ) public onlyOwner
     {
         for (uint i = 0; i < airDropCounter; i++) {
-            token.transferFrom(airDrops[_airDropID].tokenHolder, airDrops[_airDropID].participants[i], airDrops[_airDropID].amount);
+            TokenDrop(airDrops[_airDropID].tokenHolder, airDrops[_airDropID].participants[i], airDrops[_airDropID].amount);
 
-            TokenDrop(airDrops[_airDropID].participants[i], airDrops[_airDropID].amount);
+            token.transferFrom(airDrops[_airDropID].tokenHolder, airDrops[_airDropID].participants[i], airDrops[_airDropID].amount);
         }
     }
 }

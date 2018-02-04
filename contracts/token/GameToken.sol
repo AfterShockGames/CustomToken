@@ -108,7 +108,7 @@ contract GameToken is MintableToken {
     function transfer(
         address _to, 
         uint256 _value
-    ) public canTransfer(msg.sender, _value) returns (bool)
+    ) public returns (bool)
     {
         return super.transfer(_to, _value);
     }
@@ -124,7 +124,7 @@ contract GameToken is MintableToken {
         address _from,
         address _to,
         uint256 _value
-    ) public canTransfer(_from, _value) returns (bool) 
+    ) public returns (bool) //canTransfer(_from, _value) 
     {
         return super.transferFrom(_from, _to, _value);
     }
