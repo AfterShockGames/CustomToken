@@ -1,6 +1,6 @@
 const DEFAULT = {
   host: 'localhost',
-  port: 9545,
+  port: 7545,
   network_id: '*'
 }
 

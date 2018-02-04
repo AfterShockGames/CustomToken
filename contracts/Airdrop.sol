@@ -3,6 +3,7 @@ pragma solidity ^0.4.4;
 import "./token/GameToken.sol";
 import "../node_modules/zeppelin-solidity/contracts/math/SafeMath.sol";
 import "../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "../node_modules/zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 contract AirDrop is Ownable {
     using SafeMath for uint256;
@@ -19,7 +20,8 @@ contract AirDrop is Ownable {
         mapping(uint => address) participants;
     }
 
-    event TokenDrop(address sender, address receiver, uint256 amount);
+    event TokenDrop(address initiator, address receiver, uint256 amount);
+    event AddParticipant(uint participantID, address participant);
 
     uint public airDropCounter = 0;
     GameToken private token;
@@ -40,7 +42,7 @@ contract AirDrop is Ownable {
     /**
     * @dev Create a new airdrop
     *
-    * @param _tokenHolder The main tokenHolder wallet
+    * @param _tokenHolder The token holder
     * @param _maxParticipants The max amount of airDrop participants
     * @param _amount The amount to distribute
     */
@@ -53,11 +55,11 @@ contract AirDrop is Ownable {
         airDropID = airDropCounter;
 
         airDrops[airDropID] = AirDropCampaign({
+            created: true,
             tokenHolder: _tokenHolder,
             maxParticipants: _maxParticipants,
             amount: _amount,
-            participantCount: 0,
-            created: true
+            participantCount: 0
         });
 
         airDropCounter++;
@@ -80,6 +82,8 @@ contract AirDrop is Ownable {
 
         airDrops[_airDropID].participants[participantID] = _participant;
 
+        AddParticipant(airDrops[_airDropID].participantCount, _participant);
+
         airDrops[_airDropID].participantCount++;
     }
 
@@ -90,10 +94,10 @@ contract AirDrop is Ownable {
     */
     function distribute(
         uint _airDropID
-    ) public onlyOwner
+    ) public
     {
-        for (uint i = 0; i < airDropCounter; i++) {
-            TokenDrop(airDrops[_airDropID].tokenHolder, airDrops[_airDropID].participants[i], airDrops[_airDropID].amount);
+        for (uint i = 0; i < airDrops[_airDropID].participantCount; i++) {
+            TokenDrop(msg.sender, airDrops[_airDropID].participants[i], airDrops[_airDropID].amount);
 
             token.transferFrom(airDrops[_airDropID].tokenHolder, airDrops[_airDropID].participants[i], airDrops[_airDropID].amount);
         }

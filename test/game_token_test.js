@@ -11,26 +11,34 @@ let airDropParticipants = 2;
 //Expected Test Results
 let expectedAirDropID = 0;
 
-contract('Airdrop', function(accounts) {
+contract('Airdrop', (accounts) => {
     let tokenContract;
     let airDropContract;
     let participantID;
     let dropper = accounts[0];
     let receiver = accounts[1];
+    let receiver2 = accounts[2];
 
     /**
      * Initial setup. 
      * Mint tokens to dropper address and check it.
      */
-    before(async () => {
-        tokenContract = await GameToken.new(gameTokenMarketCap, {from: dropper});
-        airDropContract = await AirDrop.new(tokenContract.address, {from: dropper});
-        await tokenContract.approve(dropper, 1*1000*1000*1000*1000, {from: dropper});
+    before(() => {
+        return GameToken.new(gameTokenMarketCap).then((instance) => {
+            tokenContract = instance;
 
-        tokenContract.mint(dropper, amountToMint).then(() => {
-            return tokenContract.balanceOf.call(dropper);
-        }).then((balance) => {
-            assert.equal(balance.valueOf(), amountToMint, "Token dropper balance should equal minted balance!");
+            return AirDrop.new(tokenContract.address);
+        }).then((instance) => {
+            airDropContract = instance;
+
+            return tokenContract.mint(dropper, amountToMint).then(() => {
+                return tokenContract.balanceOf.call(dropper);
+            }).then((balance) => {
+                console.log(balance.valueOf());
+                assert.equal(balance.valueOf(), amountToMint, "Token dropper balance should equal minted balance!");
+            });
+        }).then(() => {
+            tokenContract.approve(airDropContract.address, amountToApprove);
         });
     });
 
@@ -47,25 +55,38 @@ contract('Airdrop', function(accounts) {
 
             //Execute on blockchain
             await airDropContract.createAirDrop(dropper, airDropParticipants, amountToDrop);
+
+            return true;
         });
 
         //Add an participant to the created airDrop
-        it('Allows adding a participant to the AirDrop', async () => {
+        it('Allows adding a participant to the AirDrop', () => {
             airDropContract.addParticipantToAirDrop.call(airDropID, receiver).then(participantID => {
                 assert.equal(participantID.valueOf(), expectedAirDropID, "Participant ID not correctly created!");
             });
-            
-            return airDropContract.addParticipantToAirDrop(airDropID, receiver);
+
+            airDropContract.addParticipantToAirDrop(airDropID, receiver);
+            airDropContract.addParticipantToAirDrop(airDropID, receiver2);
+
+            return true;
         });
 
-        it('Allows distributing an airDrop and sends the right amount of credits', async () => {
+        it('Allows distributing an airDrop and sends the right amount of credits to both participants', async () => {
             //Distribute and check the airDrop
-            return airDropContract.distribute(airDropID, {from: dropper}).then(success => {
+            return airDropContract.distribute(airDropID).then(success => {
                 return tokenContract.balanceOf.call(receiver);
             }).then(balance => {
-                assert.equal(balance.valueOf(), amountToDrop, "airDrop was not executed correctly.");
+                assert.equal(balance.valueOf(), amountToDrop, "AirDrop was not executed correctly.");
+
+                return tokenContract.balanceOf.call(receiver2);
+            }).then((balance) => {
+                assert.equal(balance.valueOf(), amountToDrop, "AirDrop was not executed correctly.");
 
                 return tokenContract.balanceOf.call(dropper);
+            }).then((balance) => {
+                assert.equal(balance.valueOf(), amountToMint - amountToDrop * 2, "Token Dropper should've lost the dropped coins!");
+
+                return true;
             });
         });
     });
