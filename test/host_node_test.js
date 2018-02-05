@@ -8,11 +8,11 @@ let ipAddresses         = ["192.168.178.17", "192.168.178.18"];
 
 contract('HostNode', (accounts) => {
     let hosterWithoutBalance = accounts[2];
-    let hostNodeContract  = null;
-    let tokenContract     = null;
-    let hoster            = accounts[1];
-    let hoster2           = accounts[3];
-    let owner             = accounts[0];
+    let hostNodeContract     = null;
+    let tokenContract        = null;
+    let hoster               = accounts[1];
+    let hoster2              = accounts[3];
+    let owner                = accounts[0];
 
      /**
      * Initial setup. 
@@ -87,7 +87,7 @@ contract('HostNode', (accounts) => {
     });
 
     describe('Retrieving hostnodes', () => {
-
+        //Create and retrieve a list of hostNodes
         it('Should allow a user to retrieve all Nodes', async () => {
             await hostNodeContract.registerHostNode(ipAddresses[0], {from: hoster});
             await hostNodeContract.registerHostNode(ipAddresses[1], {from: hoster2});
