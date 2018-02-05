@@ -4,8 +4,9 @@
 
 This repository includes:
 
-1. GameToken Main contract
+1. GameToken Token contract
 2. GameToken AirDrop contract
+1. GameToken HostNodes contract
 3. GameToken Game contract
 
 This project requires Solidity ^0.4.4.
