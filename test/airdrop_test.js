@@ -80,6 +80,8 @@ contract('Airdrop', (accounts) => {
 
                 return error;
             }
+
+            assert.isOk(false);
         })
 
         it('Allows distributing an airDrop and sends the right amount of credits to both participants', async () => {

@@ -40,6 +40,8 @@ contract('GameToken', (accounts) => {
 
                 return error;
             }
+
+            assert.isOk(false);
         });
 
         //Test locked transfer by owner
@@ -74,7 +76,9 @@ contract('GameToken', (accounts) => {
                 assert.notEqual(error, true, "The sender should not be able to unlock the tokens!");
 
                 return error;
-            }    
+            }  
+            
+            assert.isOk(false);
         });
 
         //Test locking transfers
@@ -93,6 +97,8 @@ contract('GameToken', (accounts) => {
 
                     return error;
                 }
+
+                assert.isOk(false);
             })
         });
 
@@ -107,6 +113,8 @@ contract('GameToken', (accounts) => {
 
                 return error;
             }
+
+            assert.isOk(false);
         });
     });
 
@@ -131,6 +139,8 @@ contract('GameToken', (accounts) => {
 
                 return error;
             }
+
+            assert.isOk(false);
         });
 
         //Test changing the coin cap
@@ -153,6 +163,8 @@ contract('GameToken', (accounts) => {
 
                 return error;
             }
+
+            assert.isOk(false);
         });
 
         //Test locking and changing the coinCap
@@ -165,6 +177,8 @@ contract('GameToken', (accounts) => {
 
                     return error;
                 }
+
+                assert.isOk(false);
             });
         });
     });
@@ -190,6 +204,8 @@ contract('GameToken', (accounts) => {
 
                 return error;
             }
+
+            assert.isOk(false);
         });
 
         //Basic minting check by anyone
@@ -225,6 +241,8 @@ contract('GameToken', (accounts) => {
 
                 return error;
             }
+
+            assert.isOk(false);
         });
 
         //Basic burning check by anyone
@@ -236,6 +254,8 @@ contract('GameToken', (accounts) => {
 
                 return error;
             }
+
+            assert.isOk(false);
         });
     });
 });
