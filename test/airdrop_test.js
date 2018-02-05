@@ -2,22 +2,23 @@ let AirDrop = artifacts.require("./AirDrop.sol");
 let GameToken = artifacts.require("./GameToken.sol");
 
 //TestData
-let gameTokenMarketCap = 1*1000*1000*1000;
-let amountToMint = 1*1000*1000;
-let amountToApprove = 1*1000*1000*1000*1000;
-let amountToDrop = 1000;
 let airDropParticipants = 2;
+let gameTokenMarketCap  = 1*1000*1000*1000;
+let amountToApprove     = 1*1000*1000*1000*1000;
+let amountToMint        = 1*1000*1000;
+let amountToDrop        = 1000;
+let fakeAirdropId       = 211;
 
 //Expected Test Results
 let expectedAirDropID = 0;
 
 contract('Airdrop', (accounts) => {
-    let tokenContract;
-    let airDropContract;
-    let participantID;
-    let dropper = accounts[0];
-    let receiver = accounts[1];
-    let receiver2 = accounts[2];
+    let airDropContract = null;
+    let participantID   = null;
+    let tokenContract   = null;
+    let receiver        = accounts[1];
+    let receiver2       = accounts[2];
+    let dropper         = accounts[0];
 
     /**
      * Initial setup. 
@@ -69,6 +70,17 @@ contract('Airdrop', (accounts) => {
 
             return true;
         });
+
+        //Test adding random participant
+        it('Should not allow adding participants to non existing airdrops', async () => {
+            try{
+                await airDropContract.addParticipantToAirDrop(fakeAirdropId, receiver);
+            } catch (error) {
+                assert.notEqual(error, true, "The participant should not have been added to the airdrop!");
+
+                return error;
+            }
+        })
 
         it('Allows distributing an airDrop and sends the right amount of credits to both participants', async () => {
             //Distribute and check the airDrop

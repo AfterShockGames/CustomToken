@@ -1,9 +1,11 @@
 let GameToken = artifacts.require("./GameToken.sol");
 
 let newGameTokenMarketCap = 1*1000*1000*1000*1000;
+let ridiculousMintAmount  = 1*1000*1000*1000*1000*1000;
 let gameTokenMarketCap    = 1*1000*1000*1000;
 let smallAmountToMint     = 1*1000*1000;
 let amountToTransfer      = 1000;
+let fakeAmountToBurn      = -1000;
 let amountToMint          = 1*1000*1000;
 let amountToBurn          = 1000;
 let coinPrice             = 100;
@@ -145,12 +147,25 @@ contract('GameToken', (accounts) => {
         //Test changing the coin cap
         it('Should not allow anyone else to change the coin cap', async () => {
             try {
-                await tokenContract.setCoinCap({from: receiver});
+                await tokenContract.setCoinCap(newGameTokenMarketCap, {from: receiver});
             } catch (error) {
                 assert.notEqual(error, true, "The sender should not be able to change the coin cap!");
 
                 return error;
             }
+        });
+
+        //Test locking and changing the coinCap
+        it('Should not allow the owner to change the coin cap after locking it', async () => {
+            return tokenContract.lockCap().then(async () => {
+                try {
+                    await tokenContract.setCoinCap(newGameTokenMarketCap);
+                } catch (error) {
+                    assert.notEqual(error, true, "The coin cap should not have been edited!");
+
+                    return error;
+                }
+            });
         });
     });
 
@@ -164,6 +179,17 @@ contract('GameToken', (accounts) => {
 
                 return balance;
             });
+        });
+
+        //Minting above market cap;
+        it('Should not allow to mint above the coin cap', async () => {
+            try{
+                await tokenContract.mint.call(mintReceiver, ridiculousMintAmount);
+            } catch (error) {
+                assert.notEqual(error, true, "The owner should not be able to mint above the coin cap!");
+
+                return error;
+            }
         });
 
         //Basic minting check by anyone
@@ -188,6 +214,17 @@ contract('GameToken', (accounts) => {
 
                 return balance;
             });
+        });
+
+        //Check burining a negative value
+        it('Should not allow the owner to burn a negative amount of tokens', async () => {
+            try {
+                await tokenContract.burn(fakeAmountToBurn);
+            } catch (error) {
+                assert.notEqual(error, true, "The owner should not be able to burn a negative amount!");
+
+                return error;
+            }
         });
 
         //Basic burning check by anyone

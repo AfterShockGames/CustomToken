@@ -70,7 +70,7 @@ contract GameToken is MintableToken {
      * @dev Locks the market cap stopping any new minting.
      *      This will never allow the cap to edited again!
      */
-    function lockCap() public onlyOwner {
+    function lockCap() public onlyOwner returns (bool) {
         capLocked = true;
     }
 
