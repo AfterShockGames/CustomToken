@@ -180,7 +180,7 @@ contract GameToken is MintableToken {
     /**
      * @dev BuyTokens function which allows users to buy tokens
      */
-    function buyTokens() public payable returns (uint256 _amount) {
+    //function buyTokens() public payable returns (uint256 _amount) {
         //To be further specified
-    }
+    //}
 }

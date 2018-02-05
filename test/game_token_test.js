@@ -219,7 +219,7 @@ contract('GameToken', (accounts) => {
         //Check burining a negative value
         it('Should not allow the owner to burn a negative amount of tokens', async () => {
             try {
-                await tokenContract.burn(fakeAmountToBurn);
+                await tokenContract.burn.call(fakeAmountToBurn);
             } catch (error) {
                 assert.notEqual(error, true, "The owner should not be able to burn a negative amount!");
 
