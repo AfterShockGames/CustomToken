@@ -8,7 +8,7 @@ contract GameToken is MintableToken {
     string public constant NAME   = "GameToken";
     string public constant SYMBOL = "GAM";
 
-    uint256 public maxCap;
+    uint256 public coinCap;
     /** The Buyable coin price */
     uint256 public coinPrice;
     bool public capLocked = false;
@@ -39,27 +39,31 @@ contract GameToken is MintableToken {
     /**
      * @dev Construct.
      * 
-     * @param _maxCap The coin cap.
+     * @param _coinCap The coin cap.
      */
     function GameToken(
-        uint256 _maxCap
+        uint256 _coinCap
     ) public
     {
-        maxCap = _maxCap;
+        coinCap = _coinCap;
     }
 
     /**
      * @dev unlock the token for free transfers.
      */
-    function unlockTransfers() public onlyOwner {
+    function unlockTransfers() public onlyOwner returns (bool) {
         transfersAllowed = true;
+
+        return true;
     }
 
     /**
      * @dev Lock the token from any transfers. 
      */
-    function lockTransfers() public onlyOwner {
+    function lockTransfers() public onlyOwner returns (bool) {
         transfersAllowed = false;
+
+        return true;
     }
 
     /**
@@ -84,7 +88,14 @@ contract GameToken is MintableToken {
     }
 
     /**
-     * @dev Add override for set maxCap.
+     * @dev Allows anyone to request the current coinPrice
+     */
+    function getCoinPrice() public view returns (uint256) {
+        return coinPrice;
+    }
+
+    /**
+     * @dev Add override for set coinCap.
      * 
      * @param _to Address to send the minted coins to.
      * @param _value The amount of coins to mint.
@@ -94,23 +105,30 @@ contract GameToken is MintableToken {
         uint256 _value
     ) public onlyOwner canMint returns (bool)
     {
-        require(totalSupply_.add(_value) <= maxCap);
+        require(totalSupply_.add(_value) <= coinCap);
 
         return super.mint(_to, _value);
     }
 
     /**
-     * @dev Sets the maxCap.
+     * @dev Sets the coinCap.
      *
-     * @param _maxCap The max coin cap to set.
+     * @param _coinCap The coin cap to set.
      */
-    function setMaxCap(
-        uint256 _maxCap
+    function setCoinCap(
+        uint256 _coinCap
     ) public onlyOwner
     {
         require(!capLocked);
         
-        maxCap = _maxCap;
+        coinCap = _coinCap;
+    }
+
+    /**
+     * @dev Gets the coinCap
+     */
+    function getCoinCap() public view returns (uint256) {
+        return coinCap;
     }
 
     /**
@@ -141,20 +159,6 @@ contract GameToken is MintableToken {
     ) public canTransfer(_from, _value) returns (bool)
     {
         return super.transferFrom(_from, _to, _value);
-    }
-
-    /**
-     * @dev Enables transfers
-     */
-    function enableTransfers() public onlyOwner {
-        transfersAllowed = true;
-    }
-
-    /**
-     * @dev Disables transfers
-     */
-    function disableTransfers() public onlyOwner {
-        transfersAllowed = false;
     }
 
     /**

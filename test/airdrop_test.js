@@ -34,7 +34,6 @@ contract('Airdrop', (accounts) => {
             return tokenContract.mint(dropper, amountToMint).then(() => {
                 return tokenContract.balanceOf.call(dropper);
             }).then((balance) => {
-                console.log(balance.valueOf());
                 assert.equal(balance.valueOf(), amountToMint, "Token dropper balance should equal minted balance!");
             });
         }).then(() => {
