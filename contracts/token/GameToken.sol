@@ -1,6 +1,7 @@
 pragma solidity ^0.4.4;
 
 import './HostNodes.sol';
+import '../game/Game.sol';
 import '../../node_modules/zeppelin-solidity/contracts/token/ERC20/MintableToken.sol';
 
 contract GameToken is MintableToken {
@@ -15,6 +16,7 @@ contract GameToken is MintableToken {
     bool public capLocked = false;
 
     bool private transfersAllowed = false;
+    mapping(address => Game) private games;
 
     /**
      * @dev Burning event.
@@ -107,7 +109,7 @@ contract GameToken is MintableToken {
     function mint(
         address _to,
         uint256 _value
-    ) public onlyOwner canMint returns (bool)
+    ) public onlyOwner canMint returns (bool) 
     {
         require(totalSupply_.add(_value) <= coinCap);
 
@@ -182,9 +184,19 @@ contract GameToken is MintableToken {
     }
 
     /**
-     * @dev BuyTokens function which allows users to buy tokens
+     * @dev Allows the owner to create games
+     *
+     * @param _gameName The game name
+     * @param _gameOwner The game owner
      */
-    //function buyTokens() public payable returns (uint256 _amount) {
-        //To be further specified
-    //}
+    function createNewGame(
+        string _gameName,
+        address _gameOwner
+    ) public onlyOwner returns (address)
+    {
+        Game game = new Game(this, _gameName, _gameOwner);
+        games[_gameOwner] = game;
+
+        return address(game);
+    }
 }

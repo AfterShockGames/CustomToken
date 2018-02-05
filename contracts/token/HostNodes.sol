@@ -1,6 +1,7 @@
 pragma solidity ^0.4.4;
 
 import './GameToken.sol';
+import '../game/Game.sol';
 
 contract HostNodes {
 
@@ -9,7 +10,10 @@ contract HostNodes {
      */
     struct Node {
         bool active;
+        bool assigned;
         string ipAddress;
+        address hoster;
+        uint256 levy;
     }
 
     mapping(address => Node) public nodes;
@@ -55,12 +59,39 @@ contract HostNodes {
             addressIndex.push(msg.sender);
 
             nodes[msg.sender] = Node({
-                active: true,
-                ipAddress: _ipAddress
+                active: true, 
+                assigned: false, 
+                ipAddress: _ipAddress, 
+                hoster: msg.sender, 
+                levy: 5
             });
         }
 
         NodeRegister(msg.sender, _ipAddress);
+
+        return true;
+    }
+
+    /**
+     * @dev assign a hostNode to the given Game
+     */
+    function assignHostNodeToGame(
+        address _game,
+        uint256 _hostNodeID
+    ) public returns (bool)
+    {
+        Node storage node = nodes[addressIndex[_hostNodeID]];
+
+        require(node.active);
+        require(!node.assigned);
+
+        Game game = Game(_game);
+
+        game.assignNode(
+            node.ipAddress,
+            node.hoster,
+            node.levy
+        );
 
         return true;
     }
