@@ -14,6 +14,7 @@ before_script:
   - npm i -g solc
   - npm i -g truffle
   - npm i -g ganache-cli
+  - npm i -g codecov
   - nohup truffle develop --log &> /dev/null &
 
 script:
@@ -23,3 +24,4 @@ script:
 
 after_script:
   - npm run coverage && cat coverage/lcov.info | coveralls
+  - codecov
