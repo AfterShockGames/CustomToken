@@ -1,16 +1,17 @@
 pragma solidity ^0.4.4;
 
+import './HostNodes.sol';
 import '../../node_modules/zeppelin-solidity/contracts/token/ERC20/MintableToken.sol';
 
 contract GameToken is MintableToken {
 
-    uint256 public constant DECIMALS = 18;
-    string public constant NAME   = "GameToken";
-    string public constant SYMBOL = "GAM";
+    uint256 public constant DECIMALS = 18; //Amount of decimals this coin supports
+    string public constant NAME   = "GameToken"; //Coin name
+    string public constant SYMBOL = "GAM"; //Coin symbol
 
-    uint256 public coinCap;
-    /** The Buyable coin price */
-    uint256 public coinPrice;
+    uint256 public coinCap; //Coin cap
+    uint256 public coinPrice; //Buyable coin price
+    HostNodes public hostNodes; //HostNodes contract
     bool public capLocked = false;
 
     bool private transfersAllowed = false;
@@ -40,12 +41,15 @@ contract GameToken is MintableToken {
      * @dev Construct.
      * 
      * @param _coinCap The coin cap.
+     * @param _requiredHostBalance The hostNode required balance
      */
     function GameToken(
-        uint256 _coinCap
+        uint256 _coinCap,
+        uint256 _requiredHostBalance
     ) public
     {
         coinCap = _coinCap;
+        hostNodes = new HostNodes(this, _requiredHostBalance);
     }
 
     /**

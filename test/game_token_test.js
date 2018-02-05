@@ -2,6 +2,7 @@ let GameToken = artifacts.require("./GameToken.sol");
 
 let newGameTokenMarketCap = 1*1000*1000*1000*1000;
 let ridiculousMintAmount  = 1*1000*1000*1000*1000*1000;
+let requiredHostBalance   = 1000;
 let gameTokenMarketCap    = 1*1000*1000*1000;
 let smallAmountToMint     = 1*1000*1000;
 let amountToTransfer      = 1000;
@@ -21,7 +22,7 @@ contract('GameToken', (accounts) => {
      * Mint tokens to start addresses
      */
     before(() => {
-        return GameToken.new(gameTokenMarketCap).then((instance) => {
+        return GameToken.new(gameTokenMarketCap, requiredHostBalance).then((instance) => {
             tokenContract = instance;
 
             return tokenContract.mint(owner, amountToMint);
@@ -41,7 +42,7 @@ contract('GameToken', (accounts) => {
                 return error;
             }
 
-            assert.isOk(false);
+            assert.isOk(false, "The sender should not be able to transfer the tokens!");
         });
 
         //Test locked transfer by owner
@@ -78,7 +79,7 @@ contract('GameToken', (accounts) => {
                 return error;
             }  
             
-            assert.isOk(false);
+            assert.isOk(false, "The sender should not be able to unlock the tokens!");
         });
 
         //Test locking transfers
@@ -98,7 +99,7 @@ contract('GameToken', (accounts) => {
                     return error;
                 }
 
-                assert.isOk(false);
+                assert.isOk(false, "The sender should not be able to transfer the tokens!");
             })
         });
 
@@ -114,7 +115,7 @@ contract('GameToken', (accounts) => {
                 return error;
             }
 
-            assert.isOk(false);
+            assert.isOk(false, "The sender should not be able to lock the tokens!");
         });
     });
 
@@ -140,7 +141,7 @@ contract('GameToken', (accounts) => {
                 return error;
             }
 
-            assert.isOk(false);
+            assert.isOk(false, "The sender should not be able to change the coin price!");
         });
 
         //Test changing the coin cap
@@ -164,7 +165,7 @@ contract('GameToken', (accounts) => {
                 return error;
             }
 
-            assert.isOk(false);
+            assert.isOk(false, "The sender should not be able to change the coin cap!");
         });
 
         //Test locking and changing the coinCap
@@ -178,7 +179,7 @@ contract('GameToken', (accounts) => {
                     return error;
                 }
 
-                assert.isOk(false);
+                assert.isOk(false, "The coin cap should not have been edited!");
             });
         });
     });
@@ -205,7 +206,7 @@ contract('GameToken', (accounts) => {
                 return error;
             }
 
-            assert.isOk(false);
+            assert.isOk(false, "The owner should not be able to mint above the coin cap!");
         });
 
         //Basic minting check by anyone
@@ -217,6 +218,8 @@ contract('GameToken', (accounts) => {
 
                 return error;
             }
+
+            assert.isOk(false, "The sender should not be able to mint tokens!");
         });
 
         //Basic burning check by owner
@@ -242,7 +245,7 @@ contract('GameToken', (accounts) => {
                 return error;
             }
 
-            assert.isOk(false);
+            assert.isOk(false, "The owner should not be able to burn a negative amount!");
         });
 
         //Basic burning check by anyone
@@ -255,7 +258,7 @@ contract('GameToken', (accounts) => {
                 return error;
             }
 
-            assert.isOk(false);
+            assert.isOk(false, "The sender should not be able to burn tokens!");
         });
     });
 });

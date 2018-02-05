@@ -20,7 +20,13 @@ contract AirDrop is Ownable {
         mapping(uint => address) participants;
     }
 
+    /**
+     * @dev TokenDrop event which is fired after x tokens have been sent to receiver
+     */
     event TokenDrop(address initiator, address receiver, uint256 amount);
+    /**
+     * @dev AddParticipant event which is fired after added a participant to an airdrop
+     */
     event AddParticipant(uint participantID, address participant);
 
     uint public airDropCounter = 0;
@@ -96,6 +102,7 @@ contract AirDrop is Ownable {
         uint _airDropID
     ) public
     {
+        //Loop through specified airdrop participants
         for (uint i = 0; i < airDrops[_airDropID].participantCount; i++) {
             TokenDrop(msg.sender, airDrops[_airDropID].participants[i], airDrops[_airDropID].amount);
 

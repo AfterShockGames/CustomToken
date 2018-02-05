@@ -3,6 +3,7 @@ let GameToken = artifacts.require("./GameToken.sol");
 
 //TestData
 let airDropParticipants = 2;
+let requiredHostBalance = 1000;
 let gameTokenMarketCap  = 1*1000*1000*1000;
 let amountToApprove     = 1*1000*1000*1000*1000;
 let amountToMint        = 1*1000*1000;
@@ -25,7 +26,7 @@ contract('Airdrop', (accounts) => {
      * Mint tokens to dropper address and check it.
      */
     before(() => {
-        return GameToken.new(gameTokenMarketCap).then((instance) => {
+        return GameToken.new(gameTokenMarketCap, requiredHostBalance).then((instance) => {
             tokenContract = instance;
 
             return AirDrop.new(tokenContract.address);
@@ -45,7 +46,7 @@ contract('Airdrop', (accounts) => {
     describe('Creation and Execution', () => {
         let airDropID;
 
-        it('Allows creating an airDrop and increments the ID', async () => {
+        it('Should allow creating an airDrop and increments the ID', async () => {
             //Firstly test with .call
             airDropContract.createAirDrop.call(dropper, airDropParticipants, amountToDrop).then((airDrop) => {
                 airDropID = airDrop;
@@ -60,7 +61,7 @@ contract('Airdrop', (accounts) => {
         });
 
         //Add an participant to the created airDrop
-        it('Allows adding a participant to the AirDrop', () => {
+        it('Should allow adding a participant to the AirDrop', () => {
             airDropContract.addParticipantToAirDrop.call(airDropID, receiver).then(participantID => {
                 assert.equal(participantID.valueOf(), expectedAirDropID, "Participant ID not correctly created!");
             });
@@ -84,7 +85,7 @@ contract('Airdrop', (accounts) => {
             assert.isOk(false);
         })
 
-        it('Allows distributing an airDrop and sends the right amount of credits to both participants', async () => {
+        it('Should Allow distributing an airDrop and sends the right amount of credits to both participants', async () => {
             //Distribute and check the airDrop
             return airDropContract.distribute(airDropID).then(success => {
                 return tokenContract.balanceOf.call(receiver);
