@@ -2,6 +2,7 @@ pragma solidity ^0.4.4;
 
 import '../token/GameToken.sol';
 import '../token/HostNodes.sol';
+import '../../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol';
 
 contract Game is Ownable {
 
