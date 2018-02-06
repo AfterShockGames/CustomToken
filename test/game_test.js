@@ -7,6 +7,7 @@ let requiredHostBalance   = 1000;
 let gameTokenMarketCap    = 1*1000*1000*1000;
 let amountToTransfer      = 100;
 let amountToReceive       = 80;
+let requiredNodes         = 10;
 let amountToMint          = 1*1000*1000;
 let ipAddress             = "192.168.178.20";
 let gameName              = "AfterShock";
@@ -87,8 +88,7 @@ contract('Game', (accounts) => {
 
     describe('Host node assigning', () => {
 
-        it('Should allow the game owner to assign more hostNodes then the configured cap', async () => {
-
+        it('Should not allow the game owner to assign more hostNodes then the configured cap', async () => {
             try{
                 await hostNodeContract.assignHostNodeToGame.call(gameContract.address, nodeID, {from: gameOwner})
             } catch (error) {
@@ -98,6 +98,14 @@ contract('Game', (accounts) => {
             }
 
             assert.isOk(false, "Owner should not be able to assign a hostNode");
+        });
+
+        it('Should allow the game owner to set the maxNodesRequired', async () => {
+            return gameContract.setNodesRequired.call(requiredNodes, {from: gameOwner}).then((result) => {
+                assert.isOk(result);
+
+                return result;
+            });
         });
 
         //First allow scaleAbleNodes so we can continue testing
