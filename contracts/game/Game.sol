@@ -80,6 +80,8 @@ contract Game is Ownable {
      * @param _to The address to transfer to
      * @param _value The amount to transfer
      * @param _nodeID The amount to transfer
+     * 
+     * @return bool Transfer success
      */
     function transferTo(
         address _to,

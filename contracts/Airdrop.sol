@@ -51,6 +51,8 @@ contract AirDrop is Ownable {
     * @param _tokenHolder The token holder
     * @param _maxParticipants The max amount of airDrop participants
     * @param _amount The amount to distribute
+    *
+    * @return uint The created airdropID
     */
     function createAirDrop(
         address _tokenHolder,
@@ -76,6 +78,8 @@ contract AirDrop is Ownable {
     * 
     * @param _airDropID The airDrop
     * @param _participant The participants address to add.
+    *
+    * @return uint The new participantID
     */
     function addParticipantToAirDrop(
         uint _airDropID,

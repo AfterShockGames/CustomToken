@@ -56,6 +56,8 @@ contract GameToken is MintableToken {
 
     /**
      * @dev unlock the token for free transfers.
+     *
+     * @return bool Success
      */
     function unlockTransfers() public onlyOwner returns (bool) {
         transfersAllowed = true;
@@ -65,6 +67,8 @@ contract GameToken is MintableToken {
 
     /**
      * @dev Lock the token from any transfers. 
+     *
+     * @return bool Success
      */
     function lockTransfers() public onlyOwner returns (bool) {
         transfersAllowed = false;
@@ -75,6 +79,8 @@ contract GameToken is MintableToken {
     /**
      * @dev Locks the market cap stopping any new minting.
      *      This will never allow the cap to edited again!
+     *
+     * @return bool Success
      */
     function lockCap() public onlyOwner returns (bool) {
         capLocked = true;
@@ -95,6 +101,8 @@ contract GameToken is MintableToken {
 
     /**
      * @dev Allows anyone to request the current coinPrice
+     *
+     * @return uint256 The coin price
      */
     function getCoinPrice() public view returns (uint256) {
         return coinPrice;
@@ -105,6 +113,8 @@ contract GameToken is MintableToken {
      * 
      * @param _to Address to send the minted coins to.
      * @param _value The amount of coins to mint.
+     *
+     * @return bool Success
      */
     function mint(
         address _to,
@@ -132,6 +142,8 @@ contract GameToken is MintableToken {
 
     /**
      * @dev Gets the coinCap
+     *
+     * @return uint256 The coinCap
      */
     function getCoinCap() public view returns (uint256) {
         return coinCap;
@@ -142,6 +154,8 @@ contract GameToken is MintableToken {
      * 
      * @param _to The address to transfer to.
      * @param _value The value to transfer.
+     *
+     * @return bool Success
      */
     function transfer(
         address _to, 
@@ -157,6 +171,8 @@ contract GameToken is MintableToken {
      * @param _from The address to send from.
      * @param _to The address to send to.
      * @param _value The amount to send.
+     *
+     * @return bool Success
      */
     function transferFrom(
         address _from,
@@ -188,6 +204,8 @@ contract GameToken is MintableToken {
      *
      * @param _gameName The game name
      * @param _gameOwner The game owner
+     *
+     * @return address The new Game contract address
      */
     function createNewGame(
         string _gameName,
