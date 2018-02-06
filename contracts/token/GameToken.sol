@@ -178,7 +178,7 @@ contract GameToken is MintableToken {
         address _from,
         address _to,
         uint256 _value
-    ) public canTransfer(_from, _value) returns (bool)
+    ) public returns (bool)
     {
         return super.transferFrom(_from, _to, _value);
     }
@@ -210,11 +210,11 @@ contract GameToken is MintableToken {
     function createNewGame(
         string _gameName,
         address _gameOwner
-    ) public onlyOwner returns (address)
+    ) public onlyOwner returns (Game)
     {
-        Game game = new Game(this, _gameName, _gameOwner);
+        Game game = new Game(this, hostNodes, _gameName, _gameOwner);
         games[_gameOwner] = game;
 
-        return address(game);
+        return game;
     }
 }

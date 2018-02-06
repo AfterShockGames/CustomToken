@@ -20,6 +20,16 @@ contract Game is Ownable {
     GameToken private gameToken;
     Node[] private nodes;
     uint256 private requiredNodes;
+    bool private scaleAbleNodes = false;
+    HostNodes private hostNodes;
+
+    /**
+     * @dev Modifier which allows the gameOwner or any of the token/HostNodes contracts to execute a function.
+     */
+    modifier onlyOwnerOrContract() {
+        require(msg.sender == address(gameToken) || msg.sender == owner || msg.sender == address(hostNodes));
+        _;
+    }
 
     /**
      * @dev Game constructor
@@ -30,14 +40,30 @@ contract Game is Ownable {
      */
     function Game(
         GameToken _gameToken,
+        HostNodes _hostNodes,
         string _gameName,
         address _owner
     ) public
     {
         gameToken = _gameToken;
         gameName = _gameName;
+        hostNodes = _hostNodes;
 
         transferOwnership(_owner);
+    }
+
+    /**
+     * @dev Allows the owner to remove the max nodes constraint
+     *
+     * @param _value true/false
+     */
+    function setScaleAbleNodes(
+        bool _value
+    ) public onlyOwner returns (bool)
+    {
+        scaleAbleNodes = _value;
+
+        return true;
     }
 
     /**
@@ -47,9 +73,11 @@ contract Game is Ownable {
      */
     function setNodesRequired(
         uint256 _requiredNodes
-    ) public onlyOwner 
+    ) public onlyOwner returns (bool)
     {
         requiredNodes = _requiredNodes;
+
+        return true;
     }
 
     /**
@@ -63,9 +91,9 @@ contract Game is Ownable {
         string _ipAddress,
         address _hoster,
         uint256 _levy
-    ) public onlyOwner
+    ) public onlyOwnerOrContract
     {
-        require(requiredNodes < nodes.length);
+        require(requiredNodes < nodes.length || scaleAbleNodes);
 
         nodes.push(Node({
             ipAddress: _ipAddress, 
@@ -90,9 +118,9 @@ contract Game is Ownable {
     ) public returns (bool)
     {
         uint256 levyAmount = _value / nodes[_nodeID].levy;
-        
-        gameToken.transfer(_to, _value - levyAmount);
-        gameToken.transfer(nodes[_nodeID].hoster, levyAmount);
+            
+        gameToken.transferFrom(msg.sender, _to, _value - levyAmount);
+        gameToken.transferFrom(msg.sender, nodes[_nodeID].hoster, levyAmount);
 
         return true;
     }

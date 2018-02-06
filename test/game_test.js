@@ -1,23 +1,34 @@
 let GameToken = artifacts.require("./GameToken.sol");
-let Game = artifacts.require("./Game.sol");
+let HostNodes = artifacts.require("./HostNodes.sol");
+let Game      = artifacts.require("./Game.sol");
 
+let amountToReceiveHoster = 20;
 let requiredHostBalance   = 1000;
 let gameTokenMarketCap    = 1*1000*1000*1000;
+let amountToTransfer      = 100;
+let amountToReceive       = 80;
 let amountToMint          = 1*1000*1000;
+let ipAddress             = "192.168.178.20";
 let gameName              = "AfterShock";
 
 contract('Game', (accounts) => {
-    let tokenContract = null;
-    let testGameOwner = accounts[1];
-    let gameContract  = null;
-    let gameOwner     = accounts[2];
-    let owner         = accounts[0];
+    let hostNodeContract = null;
+    let tokenContract    = null;
+    let testGameOwner    = accounts[1];
+    let gameContract     = null;
+    let gameAddress      = null;
+    let gameOwner        = accounts[2];
+    let receiver         = accounts[4];
+    let hoster           = accounts[3];
+    let nodeID           = 0;
+    let owner            = accounts[0];
 
     /**
      * Initial setup. 
      * Mint tokens to start addresses
      */
     before(() => {
+
         return GameToken.new(gameTokenMarketCap, requiredHostBalance).then((instance) => {
             tokenContract = instance;
 
@@ -27,15 +38,23 @@ contract('Game', (accounts) => {
         }).then(() => {
             return tokenContract.mint(gameOwner, amountToMint);
         }).then(() => {
+            return tokenContract.mint(hoster, amountToMint);
+        }).then(() => {
             return tokenContract.createNewGame(gameName, gameOwner);
         }).then(async (instance) => {
-            gameContract = instance;
+            gameAddress  = instance.logs[0].address;
 
-            return instance;
+            gameContract = await Game.at(gameAddress);
+
+            return HostNodes.at(await tokenContract.hostNodes());
+        }).then((instance) => {
+            hostNodeContract = instance;
+
+            return hostNodeContract.registerHostNode(ipAddress, {from: hoster});
         });
     });
 
-    describe('Game creation', () => {
+    describe('Creation', () => {
         //Owner game creation test
         it('Should allow the owner to create a game and return an address', async () => {
             let address;
@@ -63,6 +82,62 @@ contract('Game', (accounts) => {
             }   
 
             assert.isOk(false, "Sender should not be able to create a game");
+        });
+    });
+
+    describe('Host node assigning', () => {
+
+        it('Should allow the game owner to assign more hostNodes then the configured cap', async () => {
+
+            try{
+                await hostNodeContract.assignHostNodeToGame.call(gameContract.address, nodeID, {from: gameOwner})
+            } catch (error) {
+                assert.notEqual(error, true, "Owner should not be able to assign a hostNode");
+
+                return error;
+            }
+
+            assert.isOk(false, "Owner should not be able to assign a hostNode");
+        });
+
+        //First allow scaleAbleNodes so we can continue testing
+        it('Should allow the game owner to set the node scale ability', async () => {
+            return gameContract.setScaleAbleNodes.call(true, {from: gameOwner}).then((success) => {
+                assert.isOk(success, "Scaleability should've been updated!");
+
+                return gameContract.setScaleAbleNodes(true, {from: gameOwner});
+            }).then((result) => {
+                return result;
+            });
+        });
+
+        it('Should allow the game owner to assign a hostNode', async () => {
+
+            //Try assigning a hostNode
+            return hostNodeContract.assignHostNodeToGame.call(gameContract.address, nodeID, {from: gameOwner}).then(async (result) => {
+                assert.isOk(result);
+
+                return await hostNodeContract.assignHostNodeToGame(gameContract.address, nodeID, {from: gameOwner});
+            });
+        });
+    });
+
+    describe('Transfers', () => {
+        it('Should allow anyone to transfer via the game and it should give the hostNode x amount of levy', async () => {
+
+            await tokenContract.approve(gameAddress, amountToTransfer, {from: testGameOwner});
+
+            return gameContract.transferTo(receiver, amountToTransfer, nodeID, {from: testGameOwner}).then((result) => {
+                return tokenContract.balanceOf.call(receiver);
+            }).then((balance) => {
+                assert.equal(balance, amountToReceive, "Amount should've been sent to the receiver minus host levy");
+
+                return tokenContract.balanceOf.call(hoster);
+            }).then((balance) => {
+                assert.equal(balance, amountToReceiveHoster + amountToMint, "Levy should've been sent to the hoster");
+
+                return balance;
+            });
         });
     });
 });

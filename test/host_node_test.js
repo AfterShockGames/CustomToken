@@ -61,6 +61,12 @@ contract('HostNode', (accounts) => {
             assert.isOk(false, "HostNode should not have been registered");
         });
 
+        it('Should allow the owner to update a node', async () => {
+            return hostNodeContract.registerHostNode.call(ipAddresses[1], {from: hoster}).then((success) => {
+                
+            });
+        });
+
         //Test removal
         it('Should allow a hoster to remove his node', async () => {
             await hostNodeContract.registerHostNode(ipAddresses[0], {from: hoster});

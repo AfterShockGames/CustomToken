@@ -3,6 +3,7 @@ pragma solidity ^0.4.4;
 import './GameToken.sol';
 import '../game/Game.sol';
 
+//Plural because this manages multiple Nodes/HostNodes
 contract HostNodes {
 
     /**
