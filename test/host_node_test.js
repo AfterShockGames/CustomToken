@@ -62,8 +62,12 @@ contract('HostNode', (accounts) => {
         });
 
         it('Should allow the owner to update a node', async () => {
+            await hostNodeContract.registerHostNode(ipAddresses[0], {from: hoster})
+
             return hostNodeContract.registerHostNode.call(ipAddresses[1], {from: hoster}).then((success) => {
-                
+                return hostNodeContract.removeHostNode({from: hoster});
+            }).then((result) => {
+                return result;
             });
         });
 
