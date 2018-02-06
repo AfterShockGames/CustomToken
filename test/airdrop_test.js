@@ -1,5 +1,6 @@
 let AirDrop = artifacts.require("./AirDrop.sol");
 let GameToken = artifacts.require("./GameToken.sol");
+let GameTokenExtension = artifacts.require("./GameTokenExtension.sol");
 
 //TestData
 let airDropParticipants = 2;
@@ -26,7 +27,10 @@ contract('Airdrop', (accounts) => {
      * Mint tokens to dropper address and check it.
      */
     before(() => {
-        return GameToken.new(gameTokenMarketCap, requiredHostBalance).then((instance) => {
+
+        return GameTokenExtension.new().then((instance) => {
+            return GameToken.new(gameTokenMarketCap, requiredHostBalance, instance.address)
+        }).then((instance) => {
             tokenContract = instance;
 
             return AirDrop.new(tokenContract.address);

@@ -1,4 +1,5 @@
-let GameToken = artifacts.require("./GameToken.sol");
+let GameTokenExtension = artifacts.require("./GameTokenExtension.sol");
+let GameToken          = artifacts.require("./GameToken.sol");
 
 let newGameTokenMarketCap = 1*1000*1000*1000*1000;
 let ridiculousMintAmount  = 1*1000*1000*1000*1000*1000;
@@ -22,7 +23,9 @@ contract('GameToken', (accounts) => {
      * Mint tokens to start addresses
      */
     before(() => {
-        return GameToken.new(gameTokenMarketCap, requiredHostBalance).then((instance) => {
+        return GameTokenExtension.new().then((instance) => {
+            return GameToken.new(gameTokenMarketCap, requiredHostBalance, instance.address)
+        }).then((instance) => {
             tokenContract = instance;
 
             return tokenContract.mint(owner, amountToMint);

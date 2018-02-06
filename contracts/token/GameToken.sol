@@ -2,9 +2,10 @@ pragma solidity ^0.4.4;
 
 import './HostNodes.sol';
 import '../game/Game.sol';
+import '../helpers/Shim.sol';
 import '../../node_modules/zeppelin-solidity/contracts/token/ERC20/MintableToken.sol';
 
-contract GameToken is MintableToken {
+contract GameToken is MintableToken, Shim {
 
     uint256 public constant DECIMALS = 18; //Amount of decimals this coin supports
     string public constant NAME   = "GameToken"; //Coin name
@@ -44,11 +45,13 @@ contract GameToken is MintableToken {
      * 
      * @param _coinCap The coin cap.
      * @param _requiredHostBalance The hostNode required balance
+     * @param _shimContract Should be an Upgradable used to attach functions to the gameToken
      */
     function GameToken(
         uint256 _coinCap,
-        uint256 _requiredHostBalance
-    ) public
+        uint256 _requiredHostBalance,
+        address _shimContract
+    ) public Shim(_shimContract)
     {
         coinCap = _coinCap;
         hostNodes = new HostNodes(this, _requiredHostBalance);

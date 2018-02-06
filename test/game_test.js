@@ -1,6 +1,7 @@
-let GameToken = artifacts.require("./GameToken.sol");
-let HostNodes = artifacts.require("./HostNodes.sol");
-let Game      = artifacts.require("./Game.sol");
+let GameTokenExtension = artifacts.require("./GameTokenExtension.sol");
+let GameToken          = artifacts.require("./GameToken.sol");
+let HostNodes          = artifacts.require("./HostNodes.sol");
+let Game               = artifacts.require("./Game.sol");
 
 let amountToReceiveHoster = 20;
 let requiredHostBalance   = 1000;
@@ -30,7 +31,9 @@ contract('Game', (accounts) => {
      */
     before(() => {
 
-        return GameToken.new(gameTokenMarketCap, requiredHostBalance).then((instance) => {
+        return GameTokenExtension.new().then((instance) => {
+            return GameToken.new(gameTokenMarketCap, requiredHostBalance, instance.address)
+        }).then((instance) => {
             tokenContract = instance;
 
             return tokenContract.mint(owner, amountToMint);
