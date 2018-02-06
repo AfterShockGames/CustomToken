@@ -78,7 +78,7 @@ contract HostNodes {
      * @dev assign a hostNode to the given Game
      * 
      * @param _game The game contract address
-     * @param _hostNodeID
+     * @param _hostNodeID The host node ID
      *
      * @return bool Success
      */
@@ -94,11 +94,14 @@ contract HostNodes {
 
         Game game = Game(_game);
 
+        //Final check is being done in the Game contract
         game.assignNode(
             node.ipAddress,
             node.hoster,
             node.levy
         );
+
+        node.assigned = true;
 
         return true;
     }
