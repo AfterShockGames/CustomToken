@@ -29,7 +29,7 @@ contract Shim is Upgradable {
      */
     function() public {
         bytes4 sig;
-        
+
         assembly 
         { 
             sig := calldataload(0) 

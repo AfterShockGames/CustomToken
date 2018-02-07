@@ -7,12 +7,12 @@ contract GameTokenExtension is Upgradable {
     /**
      * @dev Test placeholder function
      */
-    function test() public pure returns (uint) {
-        return 1;
+    function test() public returns (uint) {
+        return 1231232112312132;
     }
 
-    function initialize() {
-        functionSizes[bytes4(keccak256("test()"))] = 32;
+    function initialize() public {
+            functionSizes[bytes4(keccak256("test()"))] = 32;
     }
 
 }
