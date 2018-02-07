@@ -22,6 +22,7 @@ contract Game is Ownable {
     uint256 private requiredNodes;
     bool private scaleAbleNodes = false;
     HostNodes private hostNodes;
+    Shim private shim;
 
     /**
      * @dev Modifier which allows the gameOwner or any of the token/HostNodes contracts to execute a function.

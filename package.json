@@ -16,8 +16,5 @@
   "dependencies": {
     "solidity-coverage": "^0.4.9",
     "zeppelin-solidity": "1.6.0"
-  },
-  "devDependencies": {
-    "@digix/doxity": "^0.5.2"
   }
 }

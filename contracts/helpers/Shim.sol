@@ -35,7 +35,7 @@ contract Shim is Upgradable {
             sig := calldataload(0) 
         }
 
-        uint length = functionSizes[sig];
+        uint length = getFunctionSize(sig);
         address target = currentContract;
         
         assembly 

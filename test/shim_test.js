@@ -27,7 +27,21 @@ contract('Shim', (accounts) => {
     //Test a predefined basic Shimmed function
     describe('Basic Shim tests', () => {
         it('Should return 1', async () => {
-            assert.equal(await extensionContract.test.call(), 1);
+            return assert.equal(await extensionContract.test.call(), 1);
+        });
+
+        it('Should not allow a shim to be replaced', async () => {
+            let shimContract = await Shim.new(extensionContract.address);
+
+            try {                
+                shimContract.replace.call(extensionContract.address)            
+            } catch (error) {
+                assert.notEqual(error, true, "Replace should've failed!");
+
+                return error;
+            }
+
+            assert.isOk(false, "Replace should've failed!");
         });
     });
 });
