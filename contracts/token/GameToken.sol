@@ -5,7 +5,7 @@ import '../game/Game.sol';
 import '../helpers/Shim.sol';
 import '../../node_modules/zeppelin-solidity/contracts/token/ERC20/MintableToken.sol';
 
-contract GameToken is MintableToken, Shim {
+contract GameToken is MintableToken {
 
     uint256 public constant DECIMALS = 18; //Amount of decimals this coin supports
     string public constant NAME   = "GameToken"; //Coin name
@@ -17,6 +17,7 @@ contract GameToken is MintableToken, Shim {
     bool public capLocked = false;
 
     bool private transfersAllowed = false;
+    Shim private shim;
     mapping(address => Game) private games;
 
     /**
@@ -51,10 +52,12 @@ contract GameToken is MintableToken, Shim {
         uint256 _coinCap,
         uint256 _requiredHostBalance,
         address _shimContract
-    ) public Shim(_shimContract)
+    ) public
     {
         coinCap = _coinCap;
         hostNodes = new HostNodes(this, _requiredHostBalance);
+
+        shim = new Shim(_shimContract);
     }
 
     /**
@@ -219,5 +222,33 @@ contract GameToken is MintableToken, Shim {
         games[_gameOwner] = game;
 
         return game;
+    }
+
+    /**
+     * @dev Catches al functions and forwards them to the current contract
+     */
+    function() public {
+        bytes4 sig;
+
+        assembly 
+        { 
+            sig := calldataload(0) 
+        }
+
+        uint length = shim.getFunctionSize(sig);
+        address target = shim.currentContract();
+        
+        assembly 
+        {
+            calldatacopy(0x0, 0x0, calldatasize)
+            
+            switch delegatecall(gas, target, 0x0, calldatasize, 0, length)
+                case 0 {
+                    revert(0, 32)
+                }
+                default {
+                    return(0, length)
+                }
+        }
     }
 }

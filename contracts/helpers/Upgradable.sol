@@ -8,20 +8,22 @@ contract Upgradable {
     address public currentContract;
 
     /**
-     * @dev this function is called during the upgrade and is used to set the functionSizes.
+     * @dev This function is called during the upgrade and is used to set the functionSizes.
      */
     function initialize() public;
-
+    
     /**
-     * @dev Get a function return size, required for parent contracts to access functionSizes.
+     * @dev Gets a functionSize by signature
+     * 
+     * @param _signature The signature
      *
-     * @param _sig The bytes4 signature
+     * @return uint32 The function size
      */
     function getFunctionSize(
-        bytes4 _sig
+        bytes4 _signature
     ) public view returns (uint32)
     {
-        return functionSizes[_sig];
+        return functionSizes[_signature];
     }
 
     /**

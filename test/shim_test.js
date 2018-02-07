@@ -1,5 +1,6 @@
 let GameTokenExtension = artifacts.require("./GameTokenExtension.sol");
 let GameToken          = artifacts.require("./GameToken.sol");
+let Shim               = artifacts.require("./Shim.sol");
 
 let requiredHostBalance = 1*1000*1000*1000;
 let gameTokenMarketCap  = 1*1000*1000*1000*1000;
@@ -16,25 +17,17 @@ contract('Shim', (accounts) => {
      */
     before(() => {
         return GameTokenExtension.new().then((instance) => {
-            return GameToken.new(gameTokenMarketCap, requiredHostBalance, instance.address)
-        }).then((instance) => {
-            tokenContract = instance;
 
-            return GameTokenExtension.at(tokenContract.address);
+            return GameToken.new(gameTokenMarketCap, requiredHostBalance, instance.address);
         }).then((instance) => {
-            extensionContract = instance;
-
-            return tokenContract.mint(owner, amountToMint);
+            extensionContract = GameTokenExtension.at(instance.address);
         });
     });
 
     //Test a predefined basic Shimmed function
     describe('Basic Shim tests', () => {
         it('Should return 1', async () => {
-            // extensionContract.test().then((res) => {
-            //     console.log(res);
-            // })
-            //assert.equal(await extensionContract.test.call(), 1);
+            assert.equal(await extensionContract.test.call(), 1);
         });
     });
 });
