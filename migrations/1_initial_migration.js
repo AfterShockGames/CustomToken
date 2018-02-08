@@ -1,4 +1,3 @@
-var Migrations = artifacts.require("./Migrations.sol");
 var GameToken = artifacts.require("./token/GameToken.sol");
 var AirDrop = artifacts.require("./AirDrop.sol");
 
