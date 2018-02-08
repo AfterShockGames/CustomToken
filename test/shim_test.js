@@ -43,5 +43,19 @@ contract('Shim', (accounts) => {
 
             assert.isOk(false, "Replace should've failed!");
         });
+
+        it('Should not allow a shim to be initialized', async () => {
+            let shimContract = await Shim.new(extensionContract.address);
+
+            try {                
+                await shimContract.initialize.call();         
+            } catch (error) {
+                assert.notEqual(error, true, "Replace should've initialized!");
+
+                return error;
+            }
+
+            assert.isOk(false, "Replace should've initialized!");
+        });
     });
 });
