@@ -3,6 +3,11 @@ pragma solidity ^0.4.4;
 import "./Upgradable.sol";
 import '../../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol';
 
+/**
+ * @title Basic Shim contract
+ * 
+ * @author Stijn Bernards
+ */
 contract Shim is Upgradable {
 
     /**

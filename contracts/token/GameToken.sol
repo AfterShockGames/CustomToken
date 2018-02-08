@@ -5,6 +5,11 @@ import '../game/Game.sol';
 import '../helpers/Shim.sol';
 import '../../node_modules/zeppelin-solidity/contracts/token/ERC20/MintableToken.sol';
 
+/**
+ * @title Basic GameToke contract
+ * 
+ * @author Stijn Bernards
+ */
 contract GameToken is MintableToken {
 
     uint256 public constant DECIMALS = 18; //Amount of decimals this coin supports

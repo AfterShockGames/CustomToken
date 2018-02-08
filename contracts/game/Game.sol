@@ -22,6 +22,8 @@ contract Game is Ownable {
     uint256 private requiredNodes;
     bool private scaleAbleNodes = false;
     HostNodes private hostNodes;
+    mapping(address => bool) private bannedPlayers;
+    mapping(address => bool) private hosters;
 
     /**
      * @dev Modifier which allows the gameOwner or any of the token/HostNodes contracts to execute a function.
@@ -32,9 +34,25 @@ contract Game is Ownable {
     }
 
     /**
+     * @dev Modifier which allows the gameOwner or a hostNode to send the transaction
+     */
+    modifier onlyOwnerOrNode() {
+        require(msg.sender == owner || hosters[msg.sender]);
+        _;
+    }
+
+    /**
+     * @dev Event fired after assigning a node to a game
+     *
+     * @param _address Hoster address
+     */
+    event NodeAssigned(address _address);
+
+    /**
      * @dev Game constructor
      *
      * @param _gameToken The gameToken address
+     * @param _hostNodes HostNodes Contract
      * @param _gameName The game Name
      * @param _owner The Game Owner
      */
@@ -100,6 +118,10 @@ contract Game is Ownable {
             hoster: _hoster, 
             levy: _levy
         }));
+
+        hosters[_hoster] = true;
+
+        NodeAssigned(_hoster);
     }
 
     /**
@@ -123,5 +145,51 @@ contract Game is Ownable {
         gameToken.transferFrom(msg.sender, nodes[_nodeID].hoster, levyAmount);
 
         return true;
+    }
+
+    /**
+     * @dev Used for hostNodes and GameOwners to ban specific addresses
+     *
+     * @param _address The address to ban
+     *
+     * @return bool Success
+     */
+    function banAddress(
+        address _address
+    ) public onlyOwnerOrNode returns (bool) 
+    {
+        bannedPlayers[_address] = true;
+
+        return true;
+    }
+
+    /**
+     * @dev Used for hostNodes and GameOwner to ban specific addresses
+     * 
+     * @param _address The address to pardon
+     *
+     * @return bool Success
+     */
+    function pardonAddress(
+        address _address
+    ) public onlyOwnerOrNode returns (bool)
+    {
+        delete bannedPlayers[_address];
+
+        return true;
+    }
+
+    /**
+     * @dev Checks if a certain address is banned for this Game
+     *
+     * @param _address The address to check
+     *
+     * @return bool Banned yes/no
+     */
+    function isBanned(
+        address _address
+    ) public view returns (bool)
+    {
+        return bannedPlayers[_address];
     }
 }

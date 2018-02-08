@@ -2,6 +2,11 @@ pragma solidity ^0.4.4;
 
 import "../helpers/Upgradable.sol";
 
+/**
+ * @title Test GameTokenExtension contract
+ * 
+ * @author Stijn Bernards
+ */
 contract GameTokenExtension is Upgradable {
     
     /**

@@ -2,6 +2,11 @@ pragma solidity ^0.4.4;
 
 import '../../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol';
 
+/**
+ * @title Basic Upgradable contract
+ * 
+ * @author Stijn Bernards
+ */
 contract Upgradable {
     
     mapping(bytes4 => uint32) public functionSizes;

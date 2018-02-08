@@ -151,4 +151,51 @@ contract('Game', (accounts) => {
             });
         });
     });
+
+    //Default player management functions, banning, pardonning etc...
+    describe('Player management', () => {
+        it('Should allow the Game owner to ban any address', async () => {
+            return gameContract.banAddress(receiver, {from: gameOwner}).then(() => {
+                return gameContract.isBanned.call(receiver);
+            }).then((isBanned) => {
+                assert.isOk(isBanned);
+
+                return isBanned;
+            });
+        });
+
+        it('Should allow the Game owner to pardon any address', async () => {
+            return gameContract.banAddress(receiver, {from: gameOwner}).then(() => {
+                return gameContract.pardonAddress(receiver, {from: gameOwner});
+            }).then(() => {
+                return gameContract.isBanned.call(receiver);
+            }).then((isBanned) => {
+                assert.isNotOk(isBanned);
+
+                return isBanned;
+            });
+        });
+
+        it('Should allow the HostNode to ban any address', async () => {
+            return gameContract.banAddress(receiver, {from: hoster}).then(() => {
+                return gameContract.isBanned.call(receiver);
+            }).then((isBanned) => {
+                assert.isOk(isBanned);
+
+                return isBanned;
+            });
+        });
+
+        it('Should allow the HostNode to pardon any address', async () => {
+            return gameContract.banAddress(receiver, {from: hoster}).then(() => {
+                return gameContract.pardonAddress(receiver, {from: hoster});
+            }).then(() => {
+                return gameContract.isBanned.call(receiver);
+            }).then((isBanned) => {
+                assert.isNotOk(isBanned);
+
+                return isBanned;
+            });
+        });
+    });
 });
