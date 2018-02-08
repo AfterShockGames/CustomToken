@@ -33,7 +33,7 @@ contract Upgradable {
      */
     function replace(
         address _target
-    ) internal 
+    ) internal returns (bool)
     {
         currentContract = _target;
 
@@ -42,5 +42,7 @@ contract Upgradable {
                     keccak256("initialize()")
                 )
             );
+
+        return true;
     }
 }

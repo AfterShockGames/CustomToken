@@ -23,32 +23,4 @@ contract Shim is Upgradable {
     function initialize() public {
         revert();
     }
-
-    /**
-     * @dev Catches al functions and forwards them to the current contract
-     */
-    function() public {
-        bytes4 sig;
-
-        assembly 
-        { 
-            sig := calldataload(0) 
-        }
-
-        uint length = getFunctionSize(sig);
-        address target = currentContract;
-        
-        assembly 
-        {
-            calldatacopy(0x0, 0x0, calldatasize)
-            
-            switch delegatecall(gas, target, 0x0, calldatasize, 0, length)
-                case 0 {
-                    revert(0, 32)
-                }
-                default {
-                    return(0, length)
-                }
-        }
-    }
 }
