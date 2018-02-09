@@ -30,9 +30,15 @@ contract HostNodes {
     GameToken private gameToken;
     uint256 private requiredHostBalance;
 
-    event NodeRegister(address indexed registeredNode, string ipAddress);
-    event NodeRemoval(address indexed removedNode, string ipAddress);
+    event NodeRegister(address indexed registeredNode, string ipAddress); //Node Registry event
+    event NodeRemoval(address indexed removedNode, string ipAddress); //Node removal event
+    event NodeAssigned(address indexed assignedNode, address game); //Node Assigning
 
+    /**
+     * @dev Checks if node is active
+     * 
+     * @param _hoster The sender / hoster
+     */
     modifier onlyHostNode(
         address _hoster
     )
@@ -125,6 +131,9 @@ contract HostNodes {
      * @dev Removes a hostNode from the Game
      *
      * @param _game the Game
+     * @param _hostNodeID The hostnode to remove
+     *
+     * @return bool success
      */
     function removeHostNodeFromGame(
         address _game,

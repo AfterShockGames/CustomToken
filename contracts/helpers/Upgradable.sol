@@ -42,11 +42,7 @@ contract Upgradable {
     {
         currentContract = _target;
 
-        currentContract.delegatecall(
-            bytes4(
-                    keccak256("initialize()")
-                )
-            );
+        currentContract.delegatecall(bytes4(keccak256("initialize()")));
 
         return true;
     }
