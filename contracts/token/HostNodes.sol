@@ -76,10 +76,10 @@ contract HostNodes {
             addressIndex.push(msg.sender);
 
             nodes[msg.sender] = Node({
-                active: true, 
-                assigned: false, 
-                ipAddress: _ipAddress, 
-                hoster: msg.sender, 
+                active: true,
+                assigned: false,
+                ipAddress: _ipAddress,
+                hoster: msg.sender,
                 levy: 5
             });
         }
@@ -138,6 +138,8 @@ contract HostNodes {
         Game game = Game(_game);
 
         game.removeNode(node.hoster, _hostNodeID);
+
+        node.assigned = false;
 
         return true;
     }

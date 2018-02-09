@@ -10,8 +10,9 @@ let amountToTransfer      = 100;
 let amountToReceive       = 80;
 let requiredNodes         = 10;
 let amountToMint          = 1*1000*1000;
-let ipAddress1            = "192.168.178.10";
-let ipAddress             = "192.168.178.20";
+let ipAddress2            = "192.168.178.30";
+let ipAddress1            = "192.168.178.20";
+let ipAddress             = "192.168.178.10";
 let gameName              = "AfterShock";
 
 contract('Game', (accounts) => {
@@ -22,8 +23,9 @@ contract('Game', (accounts) => {
     let gameAddress      = null;
     let gameOwner        = accounts[2];
     let receiver         = accounts[4];
-    let hoster           = accounts[3];
+    let hoster3          = accounts[6];
     let hoster2          = accounts[5];
+    let hoster           = accounts[3];
     let nodeID3          = 2;
     let nodeID2          = 1;
     let nodeID           = 0;
@@ -49,6 +51,8 @@ contract('Game', (accounts) => {
             return tokenContract.mint(hoster, amountToMint);
         }).then(() => {
             return tokenContract.mint(hoster2, amountToMint);
+        }).then(() => {
+            return tokenContract.mint(hoster3, amountToMint);
         }).then(() => {
             return tokenContract.createNewGame(gameName, gameOwner);
         }).then(async (instance) => {
@@ -147,12 +151,14 @@ contract('Game', (accounts) => {
         });
 
         it('Should be a HostNode', async () => {
-            return hostNodeContract.assignHostNodeToGame(gameContract.address, nodeID2, {from: gameOwner}).then((result) => {
-                return gameContract.isHostNode.call(nodeID2, {from: gameOwner});
+            return hostNodeContract.registerHostNode(ipAddress2, {from: hoster3}).then(() => { 
+                return hostNodeContract.assignHostNodeToGame(gameContract.address, nodeID2, {from: gameOwner});
             }).then((result) => {
+                return gameContract.isHostNode.call(nodeID2, {from: gameOwner});
+            }).then(async (result) => {
                 assert.isOk(result, "Hostnode should be a hostnode");
 
-                return result;
+                return hostNodeContract.removeHostNodeFromGame(gameContract.address, nodeID2, {from: hoster});
             });
         });
     });
