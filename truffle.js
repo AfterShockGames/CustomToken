@@ -1,6 +1,6 @@
 const DEFAULT = {
     host: 'localhost',
-    port: 8545,
+    port: 9545,
     network_id: '*'
 }
 
@@ -12,7 +12,7 @@ const GANACHE = {
 
 const TRAVIS = {
     host: 'localhost',
-    port: 9545,
+    port: 8545,
     network_id: '*'
 }
 
