@@ -132,7 +132,7 @@ contract('Game', (accounts) => {
 
             //Try assigning a hostNode
             return hostNodeContract.assignHostNodeToGame.call(gameContract.address, nodeID, {from: gameOwner}).then(async (result) => {
-                assert.isOk(result);
+                assert.isOk(result, "Hostnode should've been assigned to the game");
 
                 return await hostNodeContract.assignHostNodeToGame(gameContract.address, nodeID, {from: gameOwner});
             });
@@ -140,7 +140,7 @@ contract('Game', (accounts) => {
 
         it('Should not be a HostNode', async () => {
             return gameContract.isHostNode.call(nodeID3, {from: gameOwner}).then((result) => {
-                assert.isNotOk(result);
+                assert.isNotOk(result, "Hostnode should not be a hostnode");
 
                 return result;
             });
@@ -150,7 +150,7 @@ contract('Game', (accounts) => {
             return hostNodeContract.assignHostNodeToGame.call(gameContract.address, nodeID2, {from: gameOwner}).then(() => {
                 return gameContract.isHostNode.call(nodeID2, {from: gameOwner});
             }).then((result) => {
-                assert.isOk(result);
+                assert.isOk(result, "Hostnode should be a hostnode");
 
                 return result;
             });
@@ -164,14 +164,24 @@ contract('Game', (accounts) => {
             }).then(() => {
                 return hostNodeContract.removeHostNodeFromGame.call(gameContract.address, nodeID2, {from: hoster});
             }).then((result) => {
-                assert.isOk(result);
+                assert.isOk(result, "Hostnode should've been removed!");
 
                 return result;
             });
         });
 
         it('Should not allow a anyone to remove another hostNode', async () => {
+            try {
+                await hostNodeContract.removeHostNodeFromGame.call(gameContract.address, nodeID2, {from: receiver});
+            } catch (error) {
+                assert.notEqual(error, true);
 
+                return error;
+            }
+
+            assert.isOk(false, "Removal should've failed!");
+
+            return true
         });
     });
 

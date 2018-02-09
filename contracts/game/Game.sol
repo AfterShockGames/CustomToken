@@ -19,12 +19,12 @@ contract Game is Ownable {
     string public gameName;
 
     GameToken private gameToken;
-    mapping(uint => Node) private nodes;
     uint private nodeAmounts;
     uint256 private requiredNodes;
     bool private scaleAbleNodes = false;
     HostNodes private hostNodes;
     mapping(address => bool) private bannedPlayers;
+    mapping(uint => Node) private nodes;
     mapping(address => bool) private hosters;
 
     /**
@@ -238,4 +238,5 @@ contract Game is Ownable {
 
         return false;
     }
+
 }
