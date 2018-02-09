@@ -114,6 +114,27 @@ contract HostNodes {
     }
 
     /**
+     * @dev Removes a hostNode from the Game
+     *
+     * @param _game the Game
+     */
+    function removeHostNodeFromGame(
+        address _game,
+        uint256 _hostNodeID
+    ) public returns (bool)
+    {
+        Node storage node = nodes[addressIndex[_hostNodeID]];
+
+        require(node.assigned);
+
+        Game game = Game(_game);
+
+        game.removeNode(node.hoster, _hostNodeID);
+
+        return true;
+    }
+
+    /**
      * @dev Remove a HostNode from the mapping
      *
      * @return bool Success

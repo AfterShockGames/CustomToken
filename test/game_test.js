@@ -10,6 +10,7 @@ let amountToTransfer      = 100;
 let amountToReceive       = 80;
 let requiredNodes         = 10;
 let amountToMint          = 1*1000*1000;
+let ipAddress1            = "192.168.178.10";
 let ipAddress             = "192.168.178.20";
 let gameName              = "AfterShock";
 
@@ -22,6 +23,8 @@ contract('Game', (accounts) => {
     let gameOwner        = accounts[2];
     let receiver         = accounts[4];
     let hoster           = accounts[3];
+    let hoster2          = accounts[5];
+    let nodeID2          = 1;
     let nodeID           = 0;
     let owner            = accounts[0];
 
@@ -43,6 +46,8 @@ contract('Game', (accounts) => {
             return tokenContract.mint(gameOwner, amountToMint);
         }).then(() => {
             return tokenContract.mint(hoster, amountToMint);
+        }).then(() => {
+            return tokenContract.mint(hoster2, amountToMint);
         }).then(() => {
             return tokenContract.createNewGame(gameName, gameOwner);
         }).then(async (instance) => {
@@ -129,6 +134,18 @@ contract('Game', (accounts) => {
                 assert.isOk(result);
 
                 return await hostNodeContract.assignHostNodeToGame(gameContract.address, nodeID, {from: gameOwner});
+            });
+        });
+    });
+
+    describe('HostNode removal', () => {
+        it('Should allow a hostNode to remove another hostNode', async () => {
+            return hostNodeContract.registerHostNode(ipAddress1, {from: hoster2}).then(() => {
+                return hostNodeContract.assignHostNodeToGame(gameContract.address, nodeID2, {from: hoster});
+            }).then(() => {
+                return hostNodeContract.removeHostNodeFromGame.call(gameContract.address, nodeID2, {from: hoster});
+            }).then((result) => {
+                assert.isOk(result);
             });
         });
     });

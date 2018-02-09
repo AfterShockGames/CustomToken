@@ -13,6 +13,7 @@ contract Game is Ownable {
         string ipAddress;
         address hoster;
         uint256 levy;
+        bool active;
     }
 
     string public gameName;
@@ -114,9 +115,10 @@ contract Game is Ownable {
         require(requiredNodes < nodes.length || scaleAbleNodes);
 
         nodes.push(Node({
-            ipAddress: _ipAddress, 
-            hoster: _hoster, 
-            levy: _levy
+            ipAddress: _ipAddress,
+            hoster: _hoster,
+            levy: _levy,
+            active: true
         }));
 
         hosters[_hoster] = true;
@@ -191,5 +193,44 @@ contract Game is Ownable {
     ) public view returns (bool)
     {
         return bannedPlayers[_address];
+    }
+
+    /**
+     * @dev Removes a host node from the game
+     *
+     * @param _hoster The host node to remove
+     *
+     * @return bool Success
+     */
+    function removeNode(
+        address _hoster,
+        uint _nodeID
+    ) public onlyOwnerOrContract returns (bool)
+    {
+        require(isHostNode(_nodeID));
+
+        delete hosters[_hoster];
+        delete nodes[_nodeID];
+        nodes.length--;
+
+        return true;
+    }
+
+    /**
+     * @dev Checks if id is a hostNode
+     *
+     * @param _nodeID Hostnode ID
+     *
+     * @return bool isNode
+     */
+    function isHostNode(
+        uint _nodeID
+    ) public view onlyOwnerOrContract returns (bool)
+    {
+        if (nodes[_nodeID].active) {
+            return true;
+        }
+
+        return false;
     }
 }
