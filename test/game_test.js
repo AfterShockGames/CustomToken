@@ -24,6 +24,7 @@ contract('Game', (accounts) => {
     let receiver         = accounts[4];
     let hoster           = accounts[3];
     let hoster2          = accounts[5];
+    let nodeID3          = 2;
     let nodeID2          = 1;
     let nodeID           = 0;
     let owner            = accounts[0];
@@ -136,6 +137,24 @@ contract('Game', (accounts) => {
                 return await hostNodeContract.assignHostNodeToGame(gameContract.address, nodeID, {from: gameOwner});
             });
         });
+
+        it('Should not be a HostNode', async () => {
+            return gameContract.isHostNode.call(nodeID3, {from: gameOwner}).then((result) => {
+                assert.isNotOk(result);
+
+                return result;
+            });
+        });
+
+        it('Should be a HostNode', async () => {
+            return hostNodeContract.assignHostNodeToGame.call(gameContract.address, nodeID2, {from: gameOwner}).then(() => {
+                return gameContract.isHostNode.call(nodeID2, {from: gameOwner});
+            }).then((result) => {
+                assert.isOk(result);
+
+                return result;
+            });
+        });
     });
 
     describe('HostNode removal', () => {
@@ -146,7 +165,13 @@ contract('Game', (accounts) => {
                 return hostNodeContract.removeHostNodeFromGame.call(gameContract.address, nodeID2, {from: hoster});
             }).then((result) => {
                 assert.isOk(result);
+
+                return result;
             });
+        });
+
+        it('Should not allow a anyone to remove another hostNode', async () => {
+
         });
     });
 

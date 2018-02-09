@@ -19,7 +19,8 @@ contract Game is Ownable {
     string public gameName;
 
     GameToken private gameToken;
-    Node[] private nodes;
+    mapping(uint => Node) private nodes;
+    uint private nodeAmounts;
     uint256 private requiredNodes;
     bool private scaleAbleNodes = false;
     HostNodes private hostNodes;
@@ -110,20 +111,24 @@ contract Game is Ownable {
         string _ipAddress,
         address _hoster,
         uint256 _levy
-    ) public onlyOwnerOrContract
+    ) public onlyOwnerOrContract returns (uint)
     {
-        require(requiredNodes < nodes.length || scaleAbleNodes);
+        require(requiredNodes < nodeAmounts || scaleAbleNodes);
 
-        nodes.push(Node({
+        nodes[nodeAmounts] = Node({
             ipAddress: _ipAddress,
             hoster: _hoster,
             levy: _levy,
             active: true
-        }));
+        });
 
         hosters[_hoster] = true;
 
+        nodeAmounts++;
+
         NodeAssigned(_hoster);
+
+        return nodeAmounts - 1;
     }
 
     /**
@@ -211,7 +216,7 @@ contract Game is Ownable {
 
         delete hosters[_hoster];
         delete nodes[_nodeID];
-        nodes.length--;
+        nodeAmounts--;
 
         return true;
     }
