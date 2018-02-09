@@ -33,6 +33,14 @@ contract HostNodes {
     event NodeRegister(address indexed registeredNode, string ipAddress);
     event NodeRemoval(address indexed removedNode, string ipAddress);
 
+    modifier onlyHostNode(
+        address _hoster
+    )
+    {
+        require(nodes[_hoster].active);
+        _;
+    }
+
     /**
      * @dev HostNode Initialization
      * 
@@ -121,7 +129,7 @@ contract HostNodes {
     function removeHostNodeFromGame(
         address _game,
         uint256 _hostNodeID
-    ) public returns (bool)
+    ) public onlyHostNode(msg.sender) returns (bool)
     {
         Node storage node = nodes[addressIndex[_hostNodeID]];
 

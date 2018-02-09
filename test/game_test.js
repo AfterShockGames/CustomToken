@@ -147,7 +147,7 @@ contract('Game', (accounts) => {
         });
 
         it('Should be a HostNode', async () => {
-            return hostNodeContract.assignHostNodeToGame.call(gameContract.address, nodeID2, {from: gameOwner}).then(() => {
+            return hostNodeContract.assignHostNodeToGame(gameContract.address, nodeID2, {from: gameOwner}).then((result) => {
                 return gameContract.isHostNode.call(nodeID2, {from: gameOwner});
             }).then((result) => {
                 assert.isOk(result, "Hostnode should be a hostnode");
@@ -170,7 +170,7 @@ contract('Game', (accounts) => {
             });
         });
 
-        it('Should not allow a anyone to remove another hostNode', async () => {
+        it('Should not allow anyone to remove another hostNode', async () => {
             try {
                 await hostNodeContract.removeHostNodeFromGame.call(gameContract.address, nodeID2, {from: receiver});
             } catch (error) {
@@ -210,7 +210,7 @@ contract('Game', (accounts) => {
             return gameContract.banAddress(receiver, {from: gameOwner}).then(() => {
                 return gameContract.isBanned.call(receiver);
             }).then((isBanned) => {
-                assert.isOk(isBanned);
+                assert.isOk(isBanned, "Player should've been banned");
 
                 return isBanned;
             });
@@ -222,7 +222,7 @@ contract('Game', (accounts) => {
             }).then(() => {
                 return gameContract.isBanned.call(receiver);
             }).then((isBanned) => {
-                assert.isNotOk(isBanned);
+                assert.isNotOk(isBanned, "Player should've been pardonned");
 
                 return isBanned;
             });
@@ -232,7 +232,7 @@ contract('Game', (accounts) => {
             return gameContract.banAddress(receiver, {from: hoster}).then(() => {
                 return gameContract.isBanned.call(receiver);
             }).then((isBanned) => {
-                assert.isOk(isBanned);
+                assert.isOk(isBanned, "Address should've been banned");
 
                 return isBanned;
             });
@@ -244,7 +244,7 @@ contract('Game', (accounts) => {
             }).then(() => {
                 return gameContract.isBanned.call(receiver);
             }).then((isBanned) => {
-                assert.isNotOk(isBanned);
+                assert.isNotOk(isBanned, "Player should've been pardonned");
 
                 return isBanned;
             });
