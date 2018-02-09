@@ -18,9 +18,9 @@ before_script:
   - nohup ganache-cli &> /dev/null &
 
 script:
-  - truffle compile
-  - truffle migrate --reset
-  - truffle test
+  - truffle compile --network travis
+  - truffle migrate --reset --network travis
+  - truffle test --network travis
 
 after_script:
   - npm run coverage && cat coverage/lcov.info
