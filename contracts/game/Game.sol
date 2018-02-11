@@ -4,6 +4,11 @@ import '../token/GameToken.sol';
 import '../token/HostNodes.sol';
 import '../../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol';
 
+/**
+ * @title Basic Game contract
+ * 
+ * @author Stijn Bernards
+ */
 contract Game is Ownable {
 
     /**

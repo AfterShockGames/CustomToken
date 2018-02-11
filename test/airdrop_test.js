@@ -1,6 +1,6 @@
-let AirDrop = artifacts.require("./AirDrop.sol");
-let GameToken = artifacts.require("./GameToken.sol");
 let GameTokenExtension = artifacts.require("./GameTokenExtension.sol");
+let GameToken          = artifacts.require("./GameToken.sol");
+let AirDrop            = artifacts.require("./AirDrop.sol");
 
 //TestData
 let airDropParticipants = 2;
