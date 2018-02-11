@@ -18,16 +18,18 @@ contract Game is Ownable {
         string ipAddress;
         address hoster;
         uint256 levy;
+        bool active;
     }
 
     string public gameName;
 
     GameToken private gameToken;
-    Node[] private nodes;
+    uint private nodeAmounts;
     uint256 private requiredNodes;
     bool private scaleAbleNodes = false;
     HostNodes private hostNodes;
     mapping(address => bool) private bannedPlayers;
+    mapping(uint => Node) private nodes;
     mapping(address => bool) private hosters;
 
     /**
@@ -114,19 +116,24 @@ contract Game is Ownable {
         string _ipAddress,
         address _hoster,
         uint256 _levy
-    ) public onlyOwnerOrContract
+    ) public onlyOwnerOrContract returns (uint)
     {
-        require(requiredNodes < nodes.length || scaleAbleNodes);
+        require(requiredNodes < nodeAmounts || scaleAbleNodes);
 
-        nodes.push(Node({
-            ipAddress: _ipAddress, 
-            hoster: _hoster, 
-            levy: _levy
-        }));
+        nodes[nodeAmounts] = Node({
+            ipAddress: _ipAddress,
+            hoster: _hoster,
+            levy: _levy,
+            active: true
+        });
 
         hosters[_hoster] = true;
 
+        nodeAmounts++;
+
         NodeAssigned(_hoster);
+
+        return nodeAmounts - 1;
     }
 
     /**
@@ -197,4 +204,44 @@ contract Game is Ownable {
     {
         return bannedPlayers[_address];
     }
+
+    /**
+     * @dev Removes a host node from the game
+     *
+     * @param _hoster The host node to remove
+     *
+     * @return bool Success
+     */
+    function removeNode(
+        address _hoster,
+        uint _nodeID
+    ) public onlyOwnerOrContract returns (bool)
+    {
+        require(isHostNode(_nodeID));
+
+        delete hosters[_hoster];
+        delete nodes[_nodeID];
+        nodeAmounts--;
+
+        return true;
+    }
+
+    /**
+     * @dev Checks if id is a hostNode
+     *
+     * @param _nodeID Hostnode ID
+     *
+     * @return bool isNode
+     */
+    function isHostNode(
+        uint _nodeID
+    ) public view onlyOwnerOrContract returns (bool)
+    {
+        if (nodes[_nodeID].active) {
+            return true;
+        }
+
+        return false;
+    }
+
 }

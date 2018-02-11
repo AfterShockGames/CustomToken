@@ -11,6 +11,8 @@ contract GameTokenExtension is Upgradable {
     
     /**
      * @dev Test placeholder function
+     *
+     * @return uint value
      */
     function test() public pure returns (uint) {
         return 1;

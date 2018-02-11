@@ -10,6 +10,12 @@ const GANACHE = {
     network_id: '*'
 }
 
+const TRAVIS = {
+    host: 'localhost',
+    port: 8545,
+    network_id: '*'
+}
+
 module.exports = {
     networks: {
         development: { 
@@ -17,6 +23,9 @@ module.exports = {
         },
         ganache: {
             ...GANACHE
+        },
+        travis: {
+            ...TRAVIS
         }
     }
 };

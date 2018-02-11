@@ -10,7 +10,9 @@ let amountToTransfer      = 100;
 let amountToReceive       = 80;
 let requiredNodes         = 10;
 let amountToMint          = 1*1000*1000;
-let ipAddress             = "192.168.178.20";
+let ipAddress2            = "192.168.178.30";
+let ipAddress1            = "192.168.178.20";
+let ipAddress             = "192.168.178.10";
 let gameName              = "AfterShock";
 
 contract('Game', (accounts) => {
@@ -21,7 +23,11 @@ contract('Game', (accounts) => {
     let gameAddress      = null;
     let gameOwner        = accounts[2];
     let receiver         = accounts[4];
+    let hoster3          = accounts[6];
+    let hoster2          = accounts[5];
     let hoster           = accounts[3];
+    let nodeID3          = 2;
+    let nodeID2          = 1;
     let nodeID           = 0;
     let owner            = accounts[0];
 
@@ -43,6 +49,10 @@ contract('Game', (accounts) => {
             return tokenContract.mint(gameOwner, amountToMint);
         }).then(() => {
             return tokenContract.mint(hoster, amountToMint);
+        }).then(() => {
+            return tokenContract.mint(hoster2, amountToMint);
+        }).then(() => {
+            return tokenContract.mint(hoster3, amountToMint);
         }).then(() => {
             return tokenContract.createNewGame(gameName, gameOwner);
         }).then(async (instance) => {
@@ -126,10 +136,58 @@ contract('Game', (accounts) => {
 
             //Try assigning a hostNode
             return hostNodeContract.assignHostNodeToGame.call(gameContract.address, nodeID, {from: gameOwner}).then(async (result) => {
-                assert.isOk(result);
+                assert.isOk(result, "Hostnode should've been assigned to the game");
 
                 return await hostNodeContract.assignHostNodeToGame(gameContract.address, nodeID, {from: gameOwner});
             });
+        });
+
+        it('Should not be a HostNode', async () => {
+            return gameContract.isHostNode.call(nodeID3, {from: gameOwner}).then((result) => {
+                assert.isNotOk(result, "Hostnode should not be a hostnode");
+
+                return result;
+            });
+        });
+
+        it('Should be a HostNode', async () => {
+            return hostNodeContract.registerHostNode(ipAddress2, {from: hoster3}).then(() => { 
+                return hostNodeContract.assignHostNodeToGame(gameContract.address, nodeID2, {from: gameOwner});
+            }).then((result) => {
+                return gameContract.isHostNode.call(nodeID2, {from: gameOwner});
+            }).then(async (result) => {
+                assert.isOk(result, "Hostnode should be a hostnode");
+
+                return hostNodeContract.removeHostNodeFromGame(gameContract.address, nodeID2, {from: hoster});
+            });
+        });
+    });
+
+    describe('HostNode removal', () => {
+        it('Should allow a hostNode to remove another hostNode', async () => {
+            return hostNodeContract.registerHostNode(ipAddress1, {from: hoster2}).then(() => {
+                return hostNodeContract.assignHostNodeToGame(gameContract.address, nodeID2, {from: hoster});
+            }).then(() => {
+                return hostNodeContract.removeHostNodeFromGame.call(gameContract.address, nodeID2, {from: hoster});
+            }).then((result) => {
+                assert.isOk(result, "Hostnode should've been removed!");
+
+                return result;
+            });
+        });
+
+        it('Should not allow anyone to remove another hostNode', async () => {
+            try {
+                await hostNodeContract.removeHostNodeFromGame.call(gameContract.address, nodeID2, {from: receiver});
+            } catch (error) {
+                assert.notEqual(error, true);
+
+                return error;
+            }
+
+            assert.isOk(false, "Removal should've failed!");
+
+            return true
         });
     });
 
@@ -158,7 +216,7 @@ contract('Game', (accounts) => {
             return gameContract.banAddress(receiver, {from: gameOwner}).then(() => {
                 return gameContract.isBanned.call(receiver);
             }).then((isBanned) => {
-                assert.isOk(isBanned);
+                assert.isOk(isBanned, "Player should've been banned");
 
                 return isBanned;
             });
@@ -170,7 +228,7 @@ contract('Game', (accounts) => {
             }).then(() => {
                 return gameContract.isBanned.call(receiver);
             }).then((isBanned) => {
-                assert.isNotOk(isBanned);
+                assert.isNotOk(isBanned, "Player should've been pardonned");
 
                 return isBanned;
             });
@@ -180,7 +238,7 @@ contract('Game', (accounts) => {
             return gameContract.banAddress(receiver, {from: hoster}).then(() => {
                 return gameContract.isBanned.call(receiver);
             }).then((isBanned) => {
-                assert.isOk(isBanned);
+                assert.isOk(isBanned, "Address should've been banned");
 
                 return isBanned;
             });
@@ -192,7 +250,7 @@ contract('Game', (accounts) => {
             }).then(() => {
                 return gameContract.isBanned.call(receiver);
             }).then((isBanned) => {
-                assert.isNotOk(isBanned);
+                assert.isNotOk(isBanned, "Player should've been pardonned");
 
                 return isBanned;
             });

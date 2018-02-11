@@ -30,8 +30,22 @@ contract HostNodes {
     GameToken private gameToken;
     uint256 private requiredHostBalance;
 
-    event NodeRegister(address indexed registeredNode, string ipAddress);
-    event NodeRemoval(address indexed removedNode, string ipAddress);
+    event NodeRegister(address indexed registeredNode, string ipAddress); //Node Registry event
+    event NodeRemoval(address indexed removedNode, string ipAddress); //Node removal event
+    event NodeAssigned(address indexed assignedNode, address game); //Node Assigning
+
+    /**
+     * @dev Checks if node is active
+     * 
+     * @param _hoster The sender / hoster
+     */
+    modifier onlyHostNode(
+        address _hoster
+    )
+    {
+        require(nodes[_hoster].active);
+        _;
+    }
 
     /**
      * @dev HostNode Initialization
@@ -68,10 +82,10 @@ contract HostNodes {
             addressIndex.push(msg.sender);
 
             nodes[msg.sender] = Node({
-                active: true, 
-                assigned: false, 
-                ipAddress: _ipAddress, 
-                hoster: msg.sender, 
+                active: true,
+                assigned: false,
+                ipAddress: _ipAddress,
+                hoster: msg.sender,
                 levy: 5
             });
         }
@@ -109,6 +123,32 @@ contract HostNodes {
         );
 
         node.assigned = true;
+
+        return true;
+    }
+
+    /**
+     * @dev Removes a hostNode from the Game
+     *
+     * @param _game the Game
+     * @param _hostNodeID The hostnode to remove
+     *
+     * @return bool success
+     */
+    function removeHostNodeFromGame(
+        address _game,
+        uint256 _hostNodeID
+    ) public onlyHostNode(msg.sender) returns (bool)
+    {
+        Node storage node = nodes[addressIndex[_hostNodeID]];
+
+        require(node.assigned);
+
+        Game game = Game(_game);
+
+        game.removeNode(node.hoster, _hostNodeID);
+
+        node.assigned = false;
 
         return true;
     }

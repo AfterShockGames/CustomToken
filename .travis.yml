@@ -15,12 +15,12 @@ before_script:
   - npm i -g truffle
   - npm i -g ganache-cli
   - npm i -g codecov
-  - nohup truffle develop --log &> /dev/null &
+  - nohup ganache-cli &> /dev/null &
 
 script:
-  - truffle compile
-  - truffle migrate --reset
-  - truffle test
+  - truffle compile --network travis
+  - truffle migrate --reset --network travis
+  - truffle test --network travis
 
 after_script:
   - npm run coverage && cat coverage/lcov.info
