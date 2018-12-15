@@ -1,8 +1,8 @@
 pragma solidity ^0.4.4;
 
-import '../token/GameToken.sol';
-import '../token/HostNodes.sol';
-import '../../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol';
+import "../token/GameToken.sol";
+import "../token/HostNodes.sol";
+import "../../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
  * @title Basic Game contract
@@ -15,28 +15,58 @@ contract Game is Ownable {
      * @dev node struct.
      */
     struct Node {
+        uint256 ID;
         string ipAddress;
         address hoster;
         uint256 levy;
         bool active;
     }
 
+    /**
+     * @dev The gameName
+     */
     string public gameName;
-
+    /**
+     * @dev Reference to the gameToken contract
+     */
     GameToken private gameToken;
-    uint private nodeAmounts;
+    /**
+     * @dev The current node amount
+     */
+    uint private nodeAmount;
+    /**
+     * @dev The required nodes by this game
+     */
     uint256 private requiredNodes;
+    /**
+     * @dev Checks if the hostnodes are auto scaleable on demand
+     */
     bool private scaleAbleNodes = false;
+    /**
+     * @dev Reference to Hostnodes contract
+     */
     HostNodes private hostNodes;
+    /**
+     * @dev A list of this games banned players
+     */
     mapping(address => bool) private bannedPlayers;
+    /**
+     * @dev Mapping containing all nodes
+     */
     mapping(uint => Node) private nodes;
+    /**
+     * @dev Host node addresses
+     */
     mapping(address => bool) private hosters;
 
     /**
      * @dev Modifier which allows the gameOwner or any of the token/HostNodes contracts to execute a function.
      */
     modifier onlyOwnerOrContract() {
-        require(msg.sender == address(gameToken) || msg.sender == owner || msg.sender == address(hostNodes));
+        require(
+            msg.sender == address(gameToken) || msg.sender == owner || msg.sender == address(hostNodes),
+            "Sender is not allowed to perform this action. Should be contract owner or contract."
+        );
         _;
     }
 
@@ -44,7 +74,10 @@ contract Game is Ownable {
      * @dev Modifier which allows the gameOwner or a hostNode to send the transaction
      */
     modifier onlyOwnerOrNode() {
-        require(msg.sender == owner || hosters[msg.sender]);
+        require(
+            msg.sender == owner || hosters[msg.sender],
+            "Sender is not allowed to perform this action. Should be gameOwner or hostNode"
+        );
         _;
     }
 
@@ -63,7 +96,7 @@ contract Game is Ownable {
      * @param _gameName The game Name
      * @param _owner The Game Owner
      */
-    function Game(
+    constructor(
         GameToken _gameToken,
         HostNodes _hostNodes,
         string _gameName,
@@ -111,16 +144,24 @@ contract Game is Ownable {
      * @param _ipAddress The nodes IPAddress
      * @param _hoster The node hoster address
      * @param _levy The configured node levy
+     * @param _nodeID The node unique ID
+     * 
+     * @return uint256 The node unique ID
      */
     function assignNode(
         string _ipAddress,
         address _hoster,
-        uint256 _levy
+        uint256 _levy,
+        uint256 _nodeID
     ) public onlyOwnerOrContract returns (uint)
     {
-        require(requiredNodes < nodeAmounts || scaleAbleNodes);
+        require(
+            requiredNodes < nodeAmount || scaleAbleNodes,
+            "There is no more space for nodes in this game"
+        );
 
-        nodes[nodeAmounts] = Node({
+        nodes[_nodeID] = Node({
+            ID: _nodeID,
             ipAddress: _ipAddress,
             hoster: _hoster,
             levy: _levy,
@@ -129,11 +170,11 @@ contract Game is Ownable {
 
         hosters[_hoster] = true;
 
-        nodeAmounts++;
+        nodeAmount++;
 
-        NodeAssigned(_hoster);
+        emit NodeAssigned(_hoster);
 
-        return nodeAmounts - 1;
+        return _nodeID;
     }
 
     /**
@@ -141,7 +182,7 @@ contract Game is Ownable {
      * 
      * @param _to The address to transfer to
      * @param _value The amount to transfer
-     * @param _nodeID The amount to transfer
+     * @param _nodeID The node which is used for the game
      * 
      * @return bool Transfer success
      */
@@ -217,11 +258,15 @@ contract Game is Ownable {
         uint _nodeID
     ) public onlyOwnerOrContract returns (bool)
     {
-        require(isHostNode(_nodeID));
+        require(
+            isHostNode(_nodeID),
+            "Node is not a hostnode"
+        );
 
         delete hosters[_hoster];
         delete nodes[_nodeID];
-        nodeAmounts--;
+
+        nodeAmount--;
 
         return true;
     }

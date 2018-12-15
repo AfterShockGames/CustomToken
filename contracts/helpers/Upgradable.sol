@@ -1,6 +1,6 @@
 pragma solidity ^0.4.4;
 
-import '../../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol';
+import "../../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
  * @title Basic Upgradable contract

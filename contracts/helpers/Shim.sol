@@ -1,7 +1,7 @@
 pragma solidity ^0.4.4;
  
 import "./Upgradable.sol";
-import '../../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol';
+import "../../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
  * @title Basic Shim contract
@@ -15,7 +15,7 @@ contract Shim is Upgradable {
      *
      * @param _target The target to replace/inject
      */
-    function Shim(
+    constructor(
         address _target
     ) public
     {
@@ -26,6 +26,6 @@ contract Shim is Upgradable {
      * @dev Override since initialize can't be called on Shim
      */
     function initialize() public {
-        revert();
+        revert("Initialize should'nt be called on the Shim");
     }
 }

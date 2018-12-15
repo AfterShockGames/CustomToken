@@ -1,12 +1,12 @@
 const DEFAULT = {
     host: 'localhost',
-    port: 9545,
+    port: 8545,
     network_id: '*'
 }
 
 const GANACHE = {
     host: 'localhost',
-    port: 7545,
+    port: 8545,
     network_id: '*'
 }
 

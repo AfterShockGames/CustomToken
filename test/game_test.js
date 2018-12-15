@@ -21,13 +21,12 @@ contract('Game', (accounts) => {
     let testGameOwner    = accounts[1];
     let gameContract     = null;
     let gameAddress      = null;
+    let nodeInvalid      = 2000;
     let gameOwner        = accounts[2];
     let receiver         = accounts[4];
     let hoster3          = accounts[6];
     let hoster2          = accounts[5];
     let hoster           = accounts[3];
-    let nodeID3          = 2;
-    let nodeID2          = 1;
     let nodeID           = 0;
     let owner            = accounts[0];
 
@@ -61,10 +60,14 @@ contract('Game', (accounts) => {
             gameContract = await Game.at(gameAddress);
 
             return HostNodes.at(await tokenContract.hostNodes());
-        }).then((instance) => {
+        }).then(async (instance) => {
             hostNodeContract = instance;
+            
+            await hostNodeContract.registerHostNode(ipAddress, {from: hoster});
 
-            return hostNodeContract.registerHostNode(ipAddress, {from: hoster});
+            nodeID = await hostNodeContract.registerHostNode.call(ipAddress, {from: hoster});
+
+            return nodeID;
         });
     });
 
@@ -133,17 +136,41 @@ contract('Game', (accounts) => {
         });
 
         it('Should allow the game owner to assign a hostNode', async () => {
+            let node = await hostNodeContract.registerHostNode.call(ipAddress2, {from: hoster3});
+            await hostNodeContract.registerHostNode(ipAddress2, {from: hoster3});
 
             //Try assigning a hostNode
-            return hostNodeContract.assignHostNodeToGame.call(gameContract.address, nodeID, {from: gameOwner}).then(async (result) => {
+            return hostNodeContract.assignHostNodeToGame.call(gameContract.address, node, {from: gameOwner}).then(async (result) => {
                 assert.isOk(result, "Hostnode should've been assigned to the game");
 
-                return await hostNodeContract.assignHostNodeToGame(gameContract.address, nodeID, {from: gameOwner});
+                await hostNodeContract.assignHostNodeToGame(gameContract.address, node, {from: gameOwner});
+
+                //Cleanup
+                return await hostNodeContract.removeHostNodeFromGame(gameContract.address, node, {from: gameOwner});
+            });
+        });
+
+        it('Should allow the game owner to remove a hostNode', async () => {
+            let node = await hostNodeContract.registerHostNode.call(ipAddress2, {from: hoster3});
+            await hostNodeContract.registerHostNode(ipAddress2, {from: hoster3});
+
+            //Try assigning a hostNode
+            return hostNodeContract.assignHostNodeToGame.call(gameContract.address, node, {from: gameOwner}).then(async (result) => {
+                assert.isOk(result, "Hostnode should've been assigned to the game");
+
+                return await hostNodeContract.assignHostNodeToGame(gameContract.address, node, {from: gameOwner});
+            }).then(async () => {
+                return await hostNodeContract.removeHostNodeFromGame.call(gameContract.address, node, {from: gameOwner});;
+            }).then(async (result) => {
+                assert.isOk(result, "Hostnode should've been removed from the game");
+
+                //Cleanup
+                return await hostNodeContract.removeHostNodeFromGame(gameContract.address, node, {from: gameOwner});;
             });
         });
 
         it('Should not be a HostNode', async () => {
-            return gameContract.isHostNode.call(nodeID3, {from: gameOwner}).then((result) => {
+            return gameContract.isHostNode.call(nodeInvalid, {from: gameOwner}).then((result) => {
                 assert.isNotOk(result, "Hostnode should not be a hostnode");
 
                 return result;
@@ -151,24 +178,27 @@ contract('Game', (accounts) => {
         });
 
         it('Should be a HostNode', async () => {
-            return hostNodeContract.registerHostNode(ipAddress2, {from: hoster3}).then(() => { 
-                return hostNodeContract.assignHostNodeToGame(gameContract.address, nodeID2, {from: gameOwner});
-            }).then((result) => {
-                return gameContract.isHostNode.call(nodeID2, {from: gameOwner});
+            let node = await hostNodeContract.registerHostNode.call(ipAddress2, {from: hoster3});
+            await hostNodeContract.registerHostNode(ipAddress2, {from: hoster3});
+            
+            return hostNodeContract.assignHostNodeToGame(gameContract.address, node, {from: gameOwner}).then((result) => {
+                return gameContract.isHostNode.call(node, {from: gameOwner});
             }).then(async (result) => {
                 assert.isOk(result, "Hostnode should be a hostnode");
 
-                return hostNodeContract.removeHostNodeFromGame(gameContract.address, nodeID2, {from: hoster});
+                return hostNodeContract.removeHostNodeFromGame(gameContract.address, node, {from: hoster});
             });
         });
     });
 
     describe('HostNode removal', () => {
         it('Should allow a hostNode to remove another hostNode', async () => {
+            let node = await hostNodeContract.registerHostNode.call(ipAddress1, {from: hoster2});
+
             return hostNodeContract.registerHostNode(ipAddress1, {from: hoster2}).then(() => {
-                return hostNodeContract.assignHostNodeToGame(gameContract.address, nodeID2, {from: hoster});
+                hostNodeContract.assignHostNodeToGame(gameContract.address, node, {from: hoster});
             }).then(() => {
-                return hostNodeContract.removeHostNodeFromGame.call(gameContract.address, nodeID2, {from: hoster});
+                return hostNodeContract.removeHostNodeFromGame.call(gameContract.address, node, {from: hoster});
             }).then((result) => {
                 assert.isOk(result, "Hostnode should've been removed!");
 
@@ -177,8 +207,11 @@ contract('Game', (accounts) => {
         });
 
         it('Should not allow anyone to remove another hostNode', async () => {
+            let node = await hostNodeContract.registerHostNode.call(ipAddress1, {from: hoster2});
+            hostNodeContract.registerHostNode(ipAddress1, {from: hoster2});
+
             try {
-                await hostNodeContract.removeHostNodeFromGame.call(gameContract.address, nodeID2, {from: receiver});
+                await hostNodeContract.removeHostNodeFromGame.call(gameContract.address, node, {from: receiver});
             } catch (error) {
                 assert.notEqual(error, true);
 

@@ -1,9 +1,9 @@
 pragma solidity ^0.4.4;
 
-import './HostNodes.sol';
-import '../game/Game.sol';
-import '../helpers/Shim.sol';
-import '../../node_modules/zeppelin-solidity/contracts/token/ERC20/MintableToken.sol';
+import "./HostNodes.sol";
+import "../game/Game.sol";
+import "../helpers/Shim.sol";
+import "../../node_modules/openzeppelin-solidity/contracts/token/ERC20/MintableToken.sol";
 
 /**
  * @title Basic GameToke contract
@@ -13,17 +13,24 @@ import '../../node_modules/zeppelin-solidity/contracts/token/ERC20/MintableToken
 contract GameToken is MintableToken {
 
     uint256 public constant DECIMALS = 18; //Amount of decimals this coin supports
-    string public constant NAME   = "GameToken"; //Coin name
-    string public constant SYMBOL = "GAM"; //Coin symbol
+    string public constant NAME   = "AfterShock"; //Coin name
+    string public constant SYMBOL = "AFEC"; //Coin symbol
 
     uint256 public coinCap; //Coin cap
     uint256 public coinPrice; //Buyable coin price
     HostNodes public hostNodes; //HostNodes contract
-    bool public capLocked = false;
+    bool public capLocked = false; //Shows if the coincap is locked
 
-    bool private transfersAllowed = false;
-    Shim private shim;
+    bool private transfersAllowed = false; //Determines if transfers are allowed
+    Shim private shim;//The Shim contract for upgrades
+    /**
+     * @dev All Registered games
+     */
     mapping(address => Game) private games;
+    /**
+     * @dev A mapping containing all gameOwner games
+     */
+    mapping(address => address[]) private gameOwnerGames;
 
     /**
      * @dev Burning event.
@@ -42,7 +49,10 @@ contract GameToken is MintableToken {
         uint256 _value
     ) 
     {
-        require(transfersAllowed || _sender == owner);
+        require(
+            transfersAllowed || _sender == owner,
+            "Token transfers are currently not allowed"
+        );
         _;
     }
 
@@ -53,7 +63,7 @@ contract GameToken is MintableToken {
      * @param _requiredHostBalance The hostNode required balance
      * @param _shimContract Should be an Upgradable used to attach functions to the gameToken
      */
-    function GameToken(
+    constructor(
         uint256 _coinCap,
         uint256 _requiredHostBalance,
         address _shimContract
@@ -132,7 +142,10 @@ contract GameToken is MintableToken {
         uint256 _value
     ) public onlyOwner canMint returns (bool) 
     {
-        require(totalSupply_.add(_value) <= coinCap);
+        require(
+            totalSupply_.add(_value) <= coinCap,
+            "Unable to mint more than the specified coinCap"
+        );
 
         return super.mint(_to, _value);
     }
@@ -146,7 +159,10 @@ contract GameToken is MintableToken {
         uint256 _coinCap
     ) public onlyOwner
     {
-        require(!capLocked);
+        require(
+            !capLocked,
+            "The coin cap can no longer be changed!"
+        );
         
         coinCap = _coinCap;
     }
@@ -200,14 +216,17 @@ contract GameToken is MintableToken {
     * @param _value — The number of tokens to be burned.
     */
     function burn(uint256 _value) public onlyOwner {
-        require(_value > 0);
+        require(
+            _value > 0,
+            "You should burn more than 0 tokens"
+        );
 
         address burner = msg.sender;
 
         balances[burner] = balances[burner].sub(_value);
         totalSupply_ = totalSupply_.sub(_value);
 
-        Burned(burner, _value);
+        emit Burned(burner, _value);
     }
 
     /**
@@ -219,12 +238,13 @@ contract GameToken is MintableToken {
      * @return address The new Game contract address
      */
     function createNewGame(
-        string _gameName,
+        string memory _gameName,
         address _gameOwner
     ) public onlyOwner returns (Game)
     {
         Game game = new Game(this, hostNodes, _gameName, _gameOwner);
-        games[_gameOwner] = game;
+        games[address(game)] = game;
+        gameOwnerGames[_gameOwner].push(address(game));
 
         return game;
     }

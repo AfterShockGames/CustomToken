@@ -1,7 +1,7 @@
 pragma solidity ^0.4.4;
 
-import './GameToken.sol';
-import '../game/Game.sol';
+import "./GameToken.sol";
+import "../game/Game.sol";
 
 /**
  * @title Basic HostNodes
@@ -16,6 +16,7 @@ contract HostNodes {
      * @dev node struct.
      */
     struct Node {
+        uint256 ID;
         bool active;
         bool assigned;
         string ipAddress;
@@ -24,9 +25,8 @@ contract HostNodes {
     }
 
     mapping(address => Node) public nodes;
-
-    mapping(address => uint256) private addressArrayIndex;
-    address[] private addressIndex;
+    mapping(uint256 => address) public nodeAddresses;
+    uint256 private currentNodeIndex;
     GameToken private gameToken;
     uint256 private requiredHostBalance;
 
@@ -43,7 +43,10 @@ contract HostNodes {
         address _hoster
     )
     {
-        require(nodes[_hoster].active);
+        require(
+            nodes[_hoster].active,
+            "Hostnode is not active"
+        );
         _;
     }
 
@@ -53,7 +56,7 @@ contract HostNodes {
      * @param _gameToken gameToken address
      * @param _requiredHostBalance Required hostNode balance
      */
-    function HostNodes(
+    constructor(
         GameToken _gameToken,
         uint256 _requiredHostBalance
     ) public
@@ -67,32 +70,40 @@ contract HostNodes {
      * 
      * @param _ipAddress hostNode IP Address
      *
-     * @return bool Success
+     * @return uint256 The nodeID
      */
     function registerHostNode(
-        string _ipAddress
-    ) public returns (bool)
+        string memory _ipAddress
+    ) public returns (uint256)
     {
-        require(gameToken.balanceOf(msg.sender) >= requiredHostBalance);
+        require(
+            gameToken.balanceOf(msg.sender) >= requiredHostBalance,
+            "Hostnode has insufficient balance"
+        );
+
+        emit NodeRegister(msg.sender, _ipAddress);
 
         //Check if node exists, if it does only change ipAddress
         if (nodes[msg.sender].active) {
             nodes[msg.sender].ipAddress = _ipAddress;
+
+            return nodes[msg.sender].ID;
         } else {
-            addressIndex.push(msg.sender);
+            nodeAddresses[currentNodeIndex] = msg.sender;
 
             nodes[msg.sender] = Node({
+                ID: currentNodeIndex,
                 active: true,
                 assigned: false,
                 ipAddress: _ipAddress,
                 hoster: msg.sender,
-                levy: 5
+                levy: 5 //Hardcoded for now
             });
+   
+            currentNodeIndex++;
+
+            return currentNodeIndex - 1;
         }
-
-        NodeRegister(msg.sender, _ipAddress);
-
-        return true;
     }
 
     /**
@@ -101,30 +112,37 @@ contract HostNodes {
      * @param _game The game contract address
      * @param _hostNodeID The host node ID
      *
-     * @return bool Success
+     * @return uint The hostNode ID
      */
     function assignHostNodeToGame(
         address _game,
         uint256 _hostNodeID
-    ) public returns (bool)
+    ) public returns (uint)
     {
-        Node storage node = nodes[addressIndex[_hostNodeID]];
+        Node storage node = nodes[nodeAddresses[_hostNodeID]];
 
-        require(node.active);
-        require(!node.assigned);
+        require(
+            node.active,
+            "This node is not active!"
+        );
+        require(
+            !node.assigned,
+            "This node has already been assigned to a game"
+        );
 
         Game game = Game(_game);
 
         //Final check is being done in the Game contract
-        game.assignNode(
+        uint nodeID = game.assignNode(
             node.ipAddress,
             node.hoster,
-            node.levy
+            node.levy,
+            node.ID    
         );
 
         node.assigned = true;
 
-        return true;
+        return nodeID;
     }
 
     /**
@@ -140,9 +158,12 @@ contract HostNodes {
         uint256 _hostNodeID
     ) public onlyHostNode(msg.sender) returns (bool)
     {
-        Node storage node = nodes[addressIndex[_hostNodeID]];
+        Node storage node = nodes[nodeAddresses[_hostNodeID]];
 
-        require(node.assigned);
+        require(
+            node.assigned,
+            "Node has not been assigned"
+        );
 
         Game game = Game(_game);
 
@@ -150,54 +171,41 @@ contract HostNodes {
 
         node.assigned = false;
 
+        delete nodeAddresses[_hostNodeID];
+
         return true;
     }
 
     /**
-     * @dev Remove a HostNode from the mapping
+     * @dev Remove the current HostNode from the nodeMapping
      *
      * @return bool Success
      */
     function removeHostNode() public returns (bool) {
-        require(nodes[msg.sender].active);
-        
-        //Do a value lookup in the address index
-        for (uint i = 0; i < addressIndex.length; i++) {
-            if (addressIndex[i] == msg.sender) {
-                delete addressIndex[i];
-                addressIndex.length--; //We have to manually decrease the array length
+        require(
+            nodes[msg.sender].active,
+            "Hostnode is not active"
+        );
 
-                break;
-            }
-        }
-
-        NodeRemoval(msg.sender, nodes[msg.sender].ipAddress);
+        emit NodeRemoval(msg.sender, nodes[msg.sender].ipAddress);
         
+        delete nodeAddresses[nodes[msg.sender].ID];
         delete nodes[msg.sender];
 
         return true;
     }
 
     /**
-     * @dev Get the amount of registered nodes.
-     *
-     * @return uint The amount of nodes
-     */
-    function getHostNodeSize() public view returns (uint) {
-        return addressIndex.length;
-    }
-
-    /**
      * @dev Retrieve a node from the nodes list
      *
-     * @param _index Index of addressIndex generated by calling size and then looping over the number.
+     * @param _nodeID Index of addressIndex generated by calling size and then looping over the number.
      *
      * @return string The node ipAddress
      */
     function getNodeAddress(
-        uint _index
-    ) public view returns (string) 
+        uint _nodeID
+    ) public view returns (string memory) 
     {
-        return nodes[addressIndex[_index]].ipAddress;
+        return nodes[nodeAddresses[_nodeID]].ipAddress;
     }
 }

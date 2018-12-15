@@ -1,9 +1,9 @@
 pragma solidity ^0.4.4;
 
 import "./token/GameToken.sol";
-import "../node_modules/zeppelin-solidity/contracts/math/SafeMath.sol";
-import "../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol";
-import "../node_modules/zeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
+import "../node_modules/openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "../node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
 contract AirDrop is Ownable {
     using SafeMath for uint256;
@@ -38,7 +38,7 @@ contract AirDrop is Ownable {
     *
     * @param _token The Custom token address
     */
-    function AirDrop(
+    constructor(
         GameToken _token
     ) public 
     {
@@ -86,13 +86,16 @@ contract AirDrop is Ownable {
         address _participant
     ) public onlyOwner returns (uint participantID)
     {
-        require(airDrops[_airDropID].created);
+        require(
+            airDrops[_airDropID].created,
+            "Airdrop has not been created!"
+        );
 
         participantID = airDrops[_airDropID].participantCount;
 
         airDrops[_airDropID].participants[participantID] = _participant;
 
-        AddParticipant(airDrops[_airDropID].participantCount, _participant);
+        emit AddParticipant(airDrops[_airDropID].participantCount, _participant);
 
         airDrops[_airDropID].participantCount++;
     }
@@ -108,7 +111,7 @@ contract AirDrop is Ownable {
     {
         //Loop through specified airdrop participants
         for (uint i = 0; i < airDrops[_airDropID].participantCount; i++) {
-            TokenDrop(msg.sender, airDrops[_airDropID].participants[i], airDrops[_airDropID].amount);
+            emit TokenDrop(msg.sender, airDrops[_airDropID].participants[i], airDrops[_airDropID].amount);
 
             token.transferFrom(airDrops[_airDropID].tokenHolder, airDrops[_airDropID].participants[i], airDrops[_airDropID].amount);
         }
